@@ -80,13 +80,17 @@ const FuelBill = () => {
           event.preventDefault();
         }
     }
-    
 
     const [csName, setCsName] = useState("Not Entered");
     const [vehNumber, setVehNumber] = useState("Not Entered");
     const [vehType, setVehType] = useState("Not Entered");
     const [paymentType, setPaymentType] = useState("");
-    const [invoiceNumber, setInvoiceNumber] = useState("");
+
+    // Invoice/Reciept Number
+    const invoiceDate = moment(now).format('DDMMYYYY');
+    const invoiceTime = moment(now).format('hhmm');
+    const randInvoiceGen = invoiceDate + invoiceTime;
+    const [invoiceNumber, setInvoiceNumber] = useState(randInvoiceGen);
 
     // Set Tax Option
     const [selectedTaxOption, setTaxOption] = useState('none');
@@ -300,7 +304,7 @@ const FuelBill = () => {
                                     <Col md={6}>
                                         <Form.Group controlId='invoiceNumber' className='mb-2'>
                                             <Form.Label>Invoice Number</Form.Label>
-                                            <Form.Control type="text" onChange={(e) => setInvoiceNumber(e.target.value)} />
+                                            <Form.Control type="text" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
                                         </Form.Group>
                                     </Col>
 
@@ -360,7 +364,7 @@ const FuelBill = () => {
 
                                     <div className="btns">
                                         {/* <Button variant="primary" onClick={generatePDF}>Generate PDF</Button> */}
-                                        <Button variant="primary" onClick={generateJPG}>Generate Image</Button>
+                                        <Button variant="primary" onClick={generateJPG}>Generate</Button>
                                     </div>
                                 </Row>
                             </div>
