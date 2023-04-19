@@ -1,14 +1,21 @@
+import Head from 'next/head';
 import { Form, Button } from 'react-bootstrap';
 import CustomNavbar from '../components/Navbar';
 
 const RentReceipt = () => {
     return (
         <>
+            <Head>
+                <title>Rent Receipt Generator</title>
+            </Head>
+
             <CustomNavbar />
+
             <section className="block">
             <div className="container">
                 <h1>Rent Receipt Generator</h1>
-                <Form className="mt-4">
+                <h5>Coming Soon...</h5>
+                {/* <Form className="mt-4">
                     <Form.Group controlId="tenantName">
                         <Form.Label>Tenant Name</Form.Label>
                         <Form.Control type="text" placeholder="Enter tenant name" />
@@ -32,7 +39,7 @@ const RentReceipt = () => {
                     <Button variant="primary" type="submit">
                         Generate Receipt
                     </Button>
-                </Form>
+                </Form> */}
             </div>
             </section>
         </>
