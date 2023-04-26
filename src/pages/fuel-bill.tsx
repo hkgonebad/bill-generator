@@ -151,7 +151,7 @@ const FuelBill = () => {
 
             <section className="block">
                 <Container>
-                    <h1>Fuel Bill Generator</h1>
+                    <h1 className='pageTitle'>Fuel Bill Generator</h1>
 
                     {/* <ChooseTemplate/> */}
 
