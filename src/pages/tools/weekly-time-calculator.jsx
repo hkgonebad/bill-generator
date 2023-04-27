@@ -59,7 +59,6 @@ const handleOutTimeChange = (index, value) => {
     return newWeekTimes;
   });
 };
-   
 
     const calculateTotalTime = () => {
         let totalTime = 0;
@@ -112,27 +111,32 @@ const handleOutTimeChange = (index, value) => {
                     <div className="timeCal">
                         <h5>Enter your In/Out times below</h5>
 
-                        <Form.Group className="mb-3" controlId="totalReqDay">
-                            <Form.Label>Total required time per day</Form.Label>
-                            <Form.Control type="text" placeholder="For eg: 9" value={totalReqDay} onChange={(e) => setTotalReqDay(e.target.value)} />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="totalReqWeek">
-                            <Form.Label>Total required time per week</Form.Label>
-                            <Form.Control type="text" placeholder="For eg: 45" value={totalReqWeek} onChange={(e) => setTotalReqWeek(e.target.value)} />
-                        </Form.Group>
+                        <Row>
+                          <Col>
+                            <Form.Group className="mb-3" controlId="totalReqDay">
+                              <Form.Label>Total required time per day</Form.Label>
+                              <Form.Control type="text" placeholder="For eg: 9" value={totalReqDay} onChange={(e) => setTotalReqDay(e.target.value)} />
+                            </Form.Group>
+                          </Col>
+                          <Col>
+                            <Form.Group className="mb-3" controlId="totalReqWeek">
+                              <Form.Label>Total required time per week</Form.Label>
+                              <Form.Control type="text" placeholder="For eg: 45" value={totalReqWeek} onChange={(e) => setTotalReqWeek(e.target.value)} />
+                            </Form.Group>
+                          </Col>
+                        </Row>
 
                         <Form.Label>Enter In/Out times for the week</Form.Label>
                         {weekTimes.map((day, index) => (
                             <InputGroup className="mb-3" key={day.day}>
-                                <InputGroup.Text>{day.day}</InputGroup.Text>
-                                <Form.Control placeholder="In Time" timeFormat="HH:mm" value={day.inTime} onChange={(e) => handleInTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
-                                <Form.Control placeholder="Out Time" dateFormat={false} timeFormat="HH:mm" value={day.outTime} onChange={(e) => handleOutTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
-                                <InputGroup.Text className={day.bgClass}>
-                                    Completed {(day.inTime && day.outTime) ? moment.duration(moment.utc(day.outTime, 'HH:mm').diff(moment.utc(day.inTime, 'HH:mm'))).asHours().toFixed(2) : '0'} hours
+                                <InputGroup.Text className='theDay'>{day.day}</InputGroup.Text>
+                                <Form.Control className='theTime' placeholder="In Time" timeFormat="HH:mm" value={day.inTime} onChange={(e) => handleInTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
+                                <Form.Control className='theTime' placeholder="Out Time" dateFormat={false} timeFormat="HH:mm" value={day.outTime} onChange={(e) => handleOutTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
+                                <InputGroup.Text className={`isCompleted ${day.bgClass}`}>
+                                    Completed {(day.inTime && day.outTime) ? moment.duration(moment.utc(day.outTime, 'HH:mm').diff(moment.utc(day.inTime, 'HH:mm'))).asHours().toFixed(2) : '0'} hrs
                                 </InputGroup.Text>
                                 <InputGroup.Text className={day.bgClass}>
-                                    Extra Hours: {day.extraTime}
+                                    Extra time: {day.extraTime}
                                 </InputGroup.Text>
                                 <Form.Control.Feedback type="invalid">
                                     Entered time is not valid, please use the format of 00:00 i.e. hh:mm.
