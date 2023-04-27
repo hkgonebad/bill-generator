@@ -21,8 +21,6 @@ interface FuelTemplate1Props {
   
 const FuelTemplate1: React.FC<FuelTemplate1Props> = ({ logo, fsRate, fsName, fsTotal, fsVolume, fsAddress, fsDate, fsTime, csName, vehNumber, vehType, paymentType, invoiceNumber, selectedTaxOption, taxNumber }) => {
 
-    console.log(fsVolume);
-
     return(
         <>
             <div className="billWrap">
