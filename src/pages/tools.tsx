@@ -21,7 +21,7 @@ const Tools = () => {
                     <div className="iconsBoxes">
                         <Row>
                             <Col lg={3}>
-                                <Link href="tools/weekly-time-calculator" className="iconBox card">
+                                <Link href="weekly-time-calculator" className="iconBox card">
                                     <div className="card-body">
                                         Weekly Time Calculator
                                     </div>

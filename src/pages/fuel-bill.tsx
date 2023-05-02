@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import CustomNavbar from '../components/Navbar';
-import ChooseTemplate from '../components/ChooseTemplate';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { SetStateAction, useEffect, useState } from 'react';
+
 import FuelTemplate1 from '../fuel/template1';
+import FuelTemplate2 from '../fuel/template2';
 
 import moment, { Moment } from 'moment';
 import Datetime from 'react-datetime';
@@ -18,6 +19,20 @@ import { jsPDF } from "jspdf";
 import html2canvas from 'html2canvas';
 
 const FuelBill = () => {
+
+    // Select Template
+    const [selectedTemplate, setSelectedTemplate] = useState('template1');
+
+    const handleTemplateChange = (event: any) => {
+        setSelectedTemplate(event.target.value);
+    }
+
+    const templateComponents: {[key: string]: React.ComponentType<any>} = {
+        'template1': FuelTemplate1,
+        'template2': FuelTemplate2
+    };
+      
+    const SelectedTemplateComponent = templateComponents[selectedTemplate];
 
     // Set Logo
     const [selectedBrand, setSelectedBrand] = useState('bp');
@@ -101,27 +116,27 @@ const FuelBill = () => {
     }
 
     // Generate PDF
-    const generatePDF = () => {
-        const content = document.getElementById('previewArea');
-        if (!content) {
-            return;
-        }
-        // const pdfWidth = content.clientWidth;
-        // const pdfHeight = content.clientHeight;
-        // console.log(pdfWidth, pdfHeight)
-        html2canvas(content).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'px');
+    // const generatePDF = () => {
+    //     const content = document.getElementById('previewArea');
+    //     if (!content) {
+    //         return;
+    //     }
+    //     // const pdfWidth = content.clientWidth;
+    //     // const pdfHeight = content.clientHeight;
+    //     // console.log(pdfWidth, pdfHeight)
+    //     html2canvas(content).then(canvas => {
+    //         const imgData = canvas.toDataURL('image/png');
+    //         const pdf = new jsPDF('p', 'px');
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = pdf.internal.pageSize.getHeight();
+    //         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-            const pdfDate = moment(now).format('DDMMYYYY');
-            const pdfTime = moment(now).format('hhmm');
-            pdf.save(`fuel-bill-${pdfDate}${pdfTime}.pdf`);
-        });
-    };
+    //         const pdfDate = moment(now).format('DDMMYYYY');
+    //         const pdfTime = moment(now).format('hhmm');
+    //         pdf.save(`fuel-bill-${pdfDate}${pdfTime}.pdf`);
+    //     });
+    // };
 
     const generateJPG = () => {
         const content = document.getElementById('previewArea');
@@ -153,7 +168,33 @@ const FuelBill = () => {
                 <Container>
                     <h1 className='pageTitle'>Fuel Bill Generator</h1>
 
-                    {/* <ChooseTemplate/> */}
+                    <div className="chooseTemplate mb-3">
+                        <h4>Select Template</h4>
+                        <Form>
+                            <div className="">
+                                <Form.Check
+                                    inline
+                                    label="Template 1"
+                                    name="group1"
+                                    type="radio"
+                                    id="template1"
+                                    checked={selectedTemplate === 'template1'}
+                                    onChange={handleTemplateChange}
+                                    value="template1"
+                                />
+                                <Form.Check
+                                    inline
+                                    label="Template 2"
+                                    name="group1"
+                                    type="radio"
+                                    id="template2"
+                                    checked={selectedTemplate === 'template2'}
+                                    onChange={handleTemplateChange}
+                                    value="template2"
+                                />
+                            </div>
+                        </Form>
+                    </div>
 
                     <Row>
                         <Col md={6}>
@@ -372,7 +413,7 @@ const FuelBill = () => {
 
                         <Col md={6}>
                             <div className="previewArea" id='previewArea'>
-                                <FuelTemplate1 
+                                <SelectedTemplateComponent
                                     logo={selectedLogo}
                                     fsName={fsName}
                                     fsAddress={fsAddress}

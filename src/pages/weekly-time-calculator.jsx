@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import CustomNavbar from '../../components/Navbar';
+import CustomNavbar from '../components/Navbar';
 import { Container, Row, Col, Form, InputGroup, Feedback } from 'react-bootstrap';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 
@@ -130,8 +130,8 @@ const handleOutTimeChange = (index, value) => {
                         {weekTimes.map((day, index) => (
                             <InputGroup className="mb-3" key={day.day}>
                                 <InputGroup.Text className='theDay'>{day.day}</InputGroup.Text>
-                                <Form.Control className='theTime' placeholder="In Time" timeFormat="HH:mm" value={day.inTime} onChange={(e) => handleInTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
-                                <Form.Control className='theTime' placeholder="Out Time" dateFormat={false} timeFormat="HH:mm" value={day.outTime} onChange={(e) => handleOutTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
+                                <Form.Control className='theTime' placeholder="In Time" value={day.inTime} onChange={(e) => handleInTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
+                                <Form.Control className='theTime' placeholder="Out Time" value={day.outTime} onChange={(e) => handleOutTimeChange(index, e.target.value)} isInvalid={!isValid[index]} />
                                 <InputGroup.Text className={`isCompleted ${day.bgClass}`}>
                                     Completed {(day.inTime && day.outTime) ? moment.duration(moment.utc(day.outTime, 'HH:mm').diff(moment.utc(day.inTime, 'HH:mm'))).asHours().toFixed(2) : '0'} hrs
                                 </InputGroup.Text>
