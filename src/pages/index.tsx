@@ -4,10 +4,10 @@ import { Modal, Button } from 'react-bootstrap';
 
 const HomePage = () => {
 
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<string | null>(null);
 
-  const handleClose = () => setShowModal(false);
-  const handleShow = (modal) => {
+  const handleClose = () => setShowModal(null);
+  const handleShow = (modal: string) => {
     setShowModal(modal);
   };
 
