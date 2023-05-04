@@ -19,11 +19,11 @@ const HomePage = () => {
           <h1>Welcome to Bill Generator!</h1>
           <p>Our bill generator is a free tool that allows you to easily create digital copies of bills, receipts, and other documents for personal record keeping or as proof of purchase. Whether you need to generate a petrol bill, rent receipt, medical bill, or any other type of bill, our bill generator makes it quick and simple.</p>
 
-          <p>To get started, simply select a bill generator from the navigation bar above. Each bill generator has a simple form that you can fill out with the relevant information. Once you've filled out the form, our bill generator will create a digital copy of the bill that you can download, save, or print.</p>
+          <p>To get started, simply select a bill generator from the navigation bar above. Each bill generator has a simple form that you can fill out with the relevant information. Once you`ve filled out the form, our bill generator will create a digital copy of the bill that you can download, save, or print.</p>
 
           <p>Our bill generator is designed for personal use or testing purposes only. Please read our <a href='#!' onClick={() => handleShow('disclaimer')}>disclaimer</a> and <a href='#!' onClick={() => handleShow('terms')}>terms of usage</a> carefully before using our tool. We do not encourage or condone any illegal or fraudulent activities, including the creation of fake bills or the use of our bill generator for such purposes.</p>
 
-          <p>If you have any questions or feedback, please don't hesitate to contact us. Thank you for using our bill generator!</p>
+          <p>If you have any questions or feedback, please don`t hesitate to contact us. Thank you for using our bill generator!</p>
         </div>
       </section>
 
