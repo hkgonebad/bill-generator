@@ -72,13 +72,37 @@ const handleOutTimeChange = (index, value) => {
         return totalTime;
     };
 
+    // const totalCoveredTime = calculateTotalTime();
+    // const remainingTime = parseInt(totalReqWeek) - totalCoveredTime;
+
+    // const updateWeekTimes = useCallback((updatedWeekTimes) => {
+    //   setWeekTimes(updatedWeekTimes);
+    // }, []);
+    
+    // useEffect(() => {
+    //   const updatedWeekTimes = weekTimes.map((day) => {
+    //     if (day.inTime && day.outTime) {
+    //       const completedHours = moment.duration(moment.utc(day.outTime, 'HH:mm').diff(moment.utc(day.inTime, 'HH:mm'))).asHours();
+      
+    //       if (completedHours < totalReqDay) {
+    //         day.bgClass = 'bg-danger text-light';
+    //       } else {
+    //         day.bgClass = 'bg-success text-light';
+    //       }
+    //     }
+    //     return day;
+    //   });
+      
+    //   updateWeekTimes(updatedWeekTimes);
+    // }, [weekTimes, totalReqDay, updateWeekTimes]);
+
     const totalCoveredTime = calculateTotalTime();
     const remainingTime = parseInt(totalReqWeek) - totalCoveredTime;
 
     const updateWeekTimes = useCallback((updatedWeekTimes) => {
       setWeekTimes(updatedWeekTimes);
     }, []);
-    
+
     useEffect(() => {
       const updatedWeekTimes = weekTimes.map((day) => {
         if (day.inTime && day.outTime) {
@@ -94,7 +118,8 @@ const handleOutTimeChange = (index, value) => {
       });
       
       updateWeekTimes(updatedWeekTimes);
-    }, [weekTimes, totalReqDay, updateWeekTimes]);
+    }, [totalReqDay, updateWeekTimes]);
+
 
     return (
         <>
