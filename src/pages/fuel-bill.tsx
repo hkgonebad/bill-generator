@@ -15,7 +15,7 @@ import ioLogo from '../../src/assets/img/fuel/oil-grayscale.png'
 import bpLogo from '../../src/assets/img/fuel/Bharat-grayscale.png'
 import eoLogo from '../../src/assets/img/fuel/Essar-grayscale.png'
 
-import { jsPDF } from "jspdf";
+// import { jsPDF } from "jspdf";
 import html2canvas from 'html2canvas';
 
 const FuelBill = () => {

@@ -27,6 +27,14 @@ const Tools = () => {
                                     </div>
                                 </Link>
                             </Col>
+
+                            <Col lg={3}>
+                                <Link href="qrcode-generator" className="iconBox card">
+                                    <div className="card-body">
+                                        QR Code Generator
+                                    </div>
+                                </Link>
+                            </Col>
                         </Row>
                     </div>
                 </Container>
