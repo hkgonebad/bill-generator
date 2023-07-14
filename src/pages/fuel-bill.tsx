@@ -64,9 +64,16 @@ const FuelBill = () => {
     // Form Fields
     const [fsName, setFsName] = useState("");
     const [fsAddress, setFsAddress] = useState("");
+    const [fsTel, setFsTel] = useState("");
     const [fsRate, setFsRate] = useState<number>(0);
     const [fsTotal, setFsTotal] = useState<number>(0);
     const [fsVolume, setFsVolume] = useState<number>(0);
+
+    const handleFsTotalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(event.target.value);
+        const roundedValue = Math.round(value * 100) / 100; // Round to two decimal places
+        setFsTotal(roundedValue);
+    };
 
     useEffect(() => {
         const voldivide = fsTotal / fsRate;
@@ -97,6 +104,7 @@ const FuelBill = () => {
     }
 
     const [csName, setCsName] = useState("Not Entered");
+    const [csTel, setCsTel] = useState("Not Entered");
     const [vehNumber, setVehNumber] = useState("Not Entered");
     const [vehType, setVehType] = useState("Not Entered");
     const [paymentType, setPaymentType] = useState("");
@@ -115,29 +123,6 @@ const FuelBill = () => {
         setTaxOption(event.target.value);
     }
 
-    // Generate PDF
-    // const generatePDF = () => {
-    //     const content = document.getElementById('previewArea');
-    //     if (!content) {
-    //         return;
-    //     }
-    //     // const pdfWidth = content.clientWidth;
-    //     // const pdfHeight = content.clientHeight;
-    //     // console.log(pdfWidth, pdfHeight)
-    //     html2canvas(content).then(canvas => {
-    //         const imgData = canvas.toDataURL('image/png');
-    //         const pdf = new jsPDF('p', 'px');
-
-    //         const pdfWidth = pdf.internal.pageSize.getWidth();
-    //         const pdfHeight = pdf.internal.pageSize.getHeight();
-    //         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-    //         const pdfDate = moment(now).format('DDMMYYYY');
-    //         const pdfTime = moment(now).format('hhmm');
-    //         pdf.save(`fuel-bill-${pdfDate}${pdfTime}.pdf`);
-    //     });
-    // };
-
     const generateJPG = () => {
         const content = document.getElementById('previewArea');
         if (!content) {
@@ -154,7 +139,6 @@ const FuelBill = () => {
             link.click();
         });
     };
-      
 
     return (
         <>
@@ -255,6 +239,12 @@ const FuelBill = () => {
                                             <Form.Label>Fuel Station Address</Form.Label>
                                             <Form.Control  as="textarea" rows={3} onChange={(e) => setFsAddress(e.target.value)} />
                                         </Form.Group>
+                                        {selectedTemplate === 'template2' && (
+                                            <Form.Group controlId='fsAddress' className='mb-2'>
+                                                <Form.Label>Fuel Station Phone</Form.Label>
+                                                <Form.Control type="text" onChange={(e) => setFsTel(e.target.value)} />
+                                            </Form.Group>
+                                        )}
                                     </Col>
 
                                     <Col md={6}>
@@ -267,7 +257,7 @@ const FuelBill = () => {
                                     <Col md={6}>
                                         <Form.Group controlId='fsTotal' className='mb-2'>
                                             <Form.Label>Total Amount</Form.Label>
-                                            <Form.Control type="text" pattern="[0-9]*" onKeyPress={restrictToNumbers} onChange={(e) => setFsTotal(parseFloat(e.target.value))} />
+                                            <Form.Control type="text" pattern="[0-9]*" onKeyPress={restrictToNumbers} onChange={handleFsTotalChange} />
                                         </Form.Group>
                                     </Col>
 
@@ -303,12 +293,21 @@ const FuelBill = () => {
 
                                 <h5>Customer Details</h5>
                                 <Row>
-                                    <Col md={12}>
+                                    <Col md={6}>
                                         <Form.Group controlId='csName' className='mb-2'>
                                             <Form.Label>Customer Name</Form.Label>
                                             <Form.Control type="text" onChange={(e) => setCsName(e.target.value)} />
                                         </Form.Group>
                                     </Col>
+
+                                    {selectedTemplate === 'template2' && (
+                                        <Col md={6}>
+                                            <Form.Group controlId='csName' className='mb-2'>
+                                                <Form.Label>Customer Phone</Form.Label>
+                                                <Form.Control type="text" onChange={(e) => setCsTel(e.target.value)} />
+                                            </Form.Group>
+                                        </Col>
+                                    )}
 
                                     <Col md={6}>
                                         <Form.Group controlId='vehNumber' className='mb-2'>
@@ -403,7 +402,7 @@ const FuelBill = () => {
                                     </Col>
                                     )}
 
-                                    <div className="btns">
+                                    <div className="btns mt-2">
                                         {/* <Button variant="primary" onClick={generatePDF}>Generate PDF</Button> */}
                                         <Button variant="primary" onClick={generateJPG}>Generate</Button>
                                     </div>
@@ -417,12 +416,14 @@ const FuelBill = () => {
                                     logo={selectedLogo}
                                     fsName={fsName}
                                     fsAddress={fsAddress}
+                                    fsTel={fsTel}
                                     fsRate={fsRate}
                                     fsTotal={fsTotal}
                                     fsVolume={fsVolume}
                                     fsDate={fsDate}
                                     fsTime={fsTime}
                                     csName={csName}
+                                    csTel={csTel}
                                     vehNumber={vehNumber}
                                     vehType={vehType}
                                     paymentType={paymentType}
