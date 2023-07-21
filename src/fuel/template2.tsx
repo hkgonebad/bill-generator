@@ -8,9 +8,11 @@ interface FuelTemplate2Props {
     fsTotal: number;
     fsVolume: number;
     fsAddress: string;
+    fsTel: string;
     fsDate: string;
     fsTime: string;
     csName: string;
+    csTel: string;
     vehNumber: string;
     vehType: string;
     paymentType: string;
@@ -19,60 +21,93 @@ interface FuelTemplate2Props {
     taxNumber: string;
 }
   
-const FuelTemplate2: React.FC<FuelTemplate2Props> = ({ logo, fsRate, fsName, fsTotal, fsVolume, fsAddress, fsDate, fsTime, csName, vehNumber, vehType, paymentType, invoiceNumber, selectedTaxOption, taxNumber }) => {
+const FuelTemplate2: React.FC<FuelTemplate2Props> = ({ logo, fsRate, fsName, fsTotal, fsVolume, fsAddress, fsTel, fsDate, fsTime, csName, csTel, vehNumber, vehType, paymentType, invoiceNumber, selectedTaxOption, taxNumber }) => {
 
     return(
         <>
-            <div className="billWrap">
+            <div className="billWrap billWrap2">
                 <div className="billBody">
                     <Image src={logo} alt="Bank Logo" className="billLogo"/>
                     <Image src={bankSideLogo} alt="Bank Logo" className="sideLogo"/>
                     <Image src={bankSideLogo} alt="Bank Logo" className="sideLogo sideLogoDown"/>
 
-                    <p className="top">WELCOME2!!!</p>
-                    <p className="top desc">{fsName}</p>
-                    {selectedTaxOption !== 'none' && (
-                        <p className="top desc">{selectedTaxOption}: {taxNumber}</p>
-                    )}
-                    <p className="top">{fsAddress}</p>
+                    <p className="top">Welcomes You</p>
+
+                    <div className="billTable">
+                        <div className="billElement">
+                            <p className="desc">{fsName}</p>
+                        </div>
+                        <div className="billElement">
+                            <p className="desc">{fsAddress}</p>
+                        </div>
+                        <div className="billElement">
+                            {fsTel !== '' && (
+                                <p className="desc">Tel. No.: {fsTel}</p>
+                            )}
+                        </div>
+                    </div>
+                    
                     <div className="billTable">
                         <div className="billElement">
                             <p className="desc">Receipt No.: {invoiceNumber}</p>
                         </div>
+                        <div className="billElement">
+                            <p className="desc">Nozzle No.: 01</p>
+                        </div>
+                        <div className="billElement">
+                            <p className="desc">Product: {vehType}</p>
+                        </div>
                     </div>
+
                     <div className="billTable">
                         <div className="billElement">
-                            <p className="desc">PRODUCT: {vehType}</p>
+                            <p className="desc">Preset Type: Amount</p>
                         </div>
                         <div className="billElement">
-                            <p className="desc">RATE/LTR: ₹ {fsRate}</p>
+                            <p className="desc">Rate(Rs/L): {fsRate}</p>
                         </div>
                         <div className="billElement">
-                            <p className="desc">AMOUNT: ₹ {fsTotal}</p>
+                            <p className="desc">Volume(L): {fsVolume}</p>
                         </div>
                         <div className="billElement">
-                            <p className="desc">VOLUME(LTR.): {fsVolume}lt</p>
+                            <p className="desc">Amount(Rs): {fsTotal}</p>
                         </div>
                     </div>
+
                     <div className="billTable">
                         <div className="billElement">
-                            <p className="desc">VEH TYPE: {vehType}</p>
+                            <p className="desc">Vehicle No: {vehNumber}</p>
                         </div>
                         <div className="billElement">
-                            <p className="desc">VEH NO: {vehNumber}</p>
+                            <p className="desc">Mobile No: {csTel}</p>
+                        </div>
+                    </div>
+
+                    <div className="billTable">
+                        <div className="billElement">
+                            <p className="desc">Date: {fsDate}</p>
                         </div>
                         <div className="billElement">
-                            <p className="desc">CUSTOMER NAME: {csName}</p>
+                            <p className="desc">Time: {fsTime}</p>
                         </div>
                     </div>
-                    <div className="billElement">
-                        <p className="desc">Date: {fsDate}</p>
-                        <p>Time: {fsTime}</p>
+                    
+                    <div className="billTable">
+                        <div className="billElementFooter">
+                            <p className="bottom">CST No: {taxNumber}</p>
+                            <p className="bottom">LST No: </p>
+                            <p className="bottom">VAT No: </p>
+                            <p className="bottom">ATTENDANT ID: Not Available</p>
+                            <p className="bottom">FCC DATE: Not Available</p>
+                            <p className="bottom">FCC TIME: Not Available</p>
+                        </div>
+
+                        <div className="billElementFooter">
+                            <p className="bottom">Thank You! Please Visit Again..</p>
+                        </div>
+                        
                     </div>
-                    <div className="billElement">
-                        <p className="desc">MODE: {paymentType}</p>
-                    </div>
-                    <p className="bottom">SAVE FUEL YAANI SAVE MONEY !! THANKS FOR FUELLING WITH US. YOU CAN NOW CALL US ON 1800 226344 (TOLL-FREE) FOR QUERIES/COMPLAINTS.</p>
+                    
                 </div>
             </div>
         </>
