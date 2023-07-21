@@ -115,6 +115,14 @@ const FuelBill = () => {
     const randInvoiceGen = invoiceDate + invoiceTime;
     const [invoiceNumber, setInvoiceNumber] = useState(randInvoiceGen);
 
+    // Generate a new invoice number whenever fsDate or fsTime changes
+    useEffect(() => {
+        const newInvoiceDate = moment(fsDate, 'DD/MM/YYYY').format('DDMMYYYY');
+        const newInvoiceTime = moment(fsTime, 'HH:mm').format('HHmm');
+        const newInvoiceNumber = newInvoiceDate + newInvoiceTime;
+        setInvoiceNumber(newInvoiceNumber);
+    }, [fsDate, fsTime]);
+
     // Set Tax Option
     const [selectedTaxOption, setTaxOption] = useState('none');
     const [taxNumber, setTaxNumber] = useState('');
