@@ -25,7 +25,7 @@ const FuelTemplate1: React.FC<FuelTemplate1Props> = ({ logo, fsRate, fsName, fsT
         <>
             <div className="billWrap billWrap1">
                 <div className="billBody">
-                    <Image src={logo} alt="Bank Logo" className="billLogo"/>
+                    <Image src={logo} width="110" height="90" alt="Bank Logo" className="billLogo"/>
                     <Image src={bankSideLogo} alt="Bank Logo" className="sideLogo"/>
                     <Image src={bankSideLogo} alt="Bank Logo" className="sideLogo sideLogoDown"/>
 
