@@ -22,7 +22,7 @@
     "eslint-config-next": "13.2.4",
     "jspdf": "^2.5.1",
     "moment": "^2.29.4",
-    "next": "13.2.4",
+    "next": "13.5.0",
     "qrcode": "^1.5.3",
     "react": "18.2.0",
     "react-bootstrap": "^2.7.2",
