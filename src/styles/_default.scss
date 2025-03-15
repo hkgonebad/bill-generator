@@ -1,0 +1,45 @@
+body{
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    height: 100%;
+}
+
+img{
+    @extend .img-fluid;
+    image-rendering: auto;
+}
+
+section{
+
+    &.block{
+        padding: 60px 0;
+    }
+}
+
+h5{
+    color: $primary;
+    margin: 15px 0 10px;
+}
+
+h6{
+    border-bottom: 1px solid #e1e1e1;
+}
+
+label{
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.siteFooter{
+
+    .svg-inline--fa{
+        height: 15px;
+    }
+}
+
+.home{
+    
+}

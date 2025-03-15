@@ -1,0 +1,107 @@
+// Rent Receipt Templates Styles
+
+.rent-receipt {
+    background-color: white;
+    color: #333;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+
+    // Ensure dark mode doesn't affect templates
+    [data-bs-theme="dark"] & {
+        background-color: white;
+        color: #333;
+    }
+
+    .signature-line {
+        border-bottom: 1px solid #333;
+        width: 200px;
+        margin: 0 auto;
+    }
+}
+
+// Template 1 - Simple Classic
+.template1 {
+    border: 1px solid #ccc;
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 20px;
+
+        h2 {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .receipt-number,
+        .receipt-date {
+            display: inline-block;
+            margin: 0 15px;
+        }
+    }
+
+    .receipt-body {
+        line-height: 1.6;
+        text-align: justify;
+
+        p {
+            margin-bottom: 15px;
+        }
+    }
+
+    .receipt-footer {
+        margin-top: 40px;
+
+        .landlord-details {
+            margin-bottom: 30px;
+        }
+
+        .signature {
+            float: right;
+            text-align: center;
+
+            .signature-line {
+                margin-bottom: 10px;
+            }
+        }
+    }
+}
+
+// Template 2 - Modern Tabular
+.template2 {
+    .receipt-container {
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .receipt-header {
+        h2 {
+            font-weight: bold;
+            color: #333;
+        }
+    }
+
+    .receipt-body {
+        .row {
+            border-bottom: 1px dotted #eee;
+            padding: 8px 0;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+
+        .col-4 {
+            color: #555;
+        }
+    }
+
+    .receipt-footer {
+        .signature-line {
+            width: 80%;
+        }
+    }
+}

@@ -1,0 +1,154 @@
+import React from "react";
+import moment from "moment";
+
+interface RentReceiptProps {
+  landlordName: string;
+  landlordAddress: string;
+  tenantName: string;
+  propertyAddress: string;
+  rentAmount: number;
+  periodStart: string;
+  periodEnd: string;
+  paymentDate: string;
+  paymentMethod: string;
+  receiptNumber: string;
+  showPanDetails: boolean;
+  panNumber: string;
+}
+
+const RentTemplate2: React.FC<RentReceiptProps> = ({ landlordName, landlordAddress, tenantName, propertyAddress, rentAmount, periodStart, periodEnd, paymentDate, paymentMethod, receiptNumber, showPanDetails, panNumber }) => {
+  // Format dates
+  const formattedPeriodStart = moment(periodStart).format("DD/MM/YYYY");
+  const formattedPeriodEnd = moment(periodEnd).format("DD/MM/YYYY");
+  const formattedPaymentDate = moment(paymentDate).format("DD/MM/YYYY");
+
+  // Format amount
+  const formattedAmount = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(rentAmount);
+
+  // Convert amount to words
+  const amountInWords = (amount: number) => {
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+    const numToWord = (num: number): string => {
+      if (num < 20) return ones[num];
+      if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? " " + ones[num % 10] : "");
+      if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 !== 0 ? " and " + numToWord(num % 100) : "");
+      if (num < 100000) return numToWord(Math.floor(num / 1000)) + " Thousand" + (num % 1000 !== 0 ? " " + numToWord(num % 1000) : "");
+      if (num < 10000000) return numToWord(Math.floor(num / 100000)) + " Lakh" + (num % 100000 !== 0 ? " " + numToWord(num % 100000) : "");
+      return numToWord(Math.floor(num / 10000000)) + " Crore" + (num % 10000000 !== 0 ? " " + numToWord(num % 10000000) : "");
+    };
+
+    return numToWord(amount) + " Rupees Only";
+  };
+
+  return (
+    <div className="rent-receipt template2" id="receiptPreview">
+      <div className="receipt-container border p-4">
+        <div className="receipt-header border-bottom pb-3">
+          <h2 className="text-center">RENT RECEIPT</h2>
+          <div className="d-flex justify-content-between mt-3">
+            <div className="receipt-number">
+              <strong>Receipt No:</strong> {receiptNumber}
+            </div>
+            <div className="receipt-date">
+              <strong>Date:</strong> {formattedPaymentDate}
+            </div>
+          </div>
+        </div>
+
+        <div className="receipt-body py-4">
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Landlord:</strong>
+            </div>
+            <div className="col-8">{landlordName}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Address:</strong>
+            </div>
+            <div className="col-8">{landlordAddress}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Tenant:</strong>
+            </div>
+            <div className="col-8">{tenantName}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Property Address:</strong>
+            </div>
+            <div className="col-8">{propertyAddress}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Period:</strong>
+            </div>
+            <div className="col-8">
+              {formattedPeriodStart} to {formattedPeriodEnd}
+            </div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Amount:</strong>
+            </div>
+            <div className="col-8">{formattedAmount}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Amount in Words:</strong>
+            </div>
+            <div className="col-8">{amountInWords(rentAmount)}</div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-4">
+              <strong>Payment Mode:</strong>
+            </div>
+            <div className="col-8">{paymentMethod}</div>
+          </div>
+
+          {showPanDetails && panNumber && (
+            <div className="row mb-3">
+              <div className="col-4">
+                <strong>PAN:</strong>
+              </div>
+              <div className="col-8">{panNumber}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="receipt-footer border-top pt-4 mt-3">
+          <div className="row">
+            <div className="col-6">
+              <p>
+                <strong>Tenant's Signature</strong>
+              </p>
+              <div className="signature-line mt-4"></div>
+            </div>
+            <div className="col-6 text-end">
+              <p>
+                <strong>Landlord's Signature</strong>
+              </p>
+              <div className="signature-line mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RentTemplate2;
