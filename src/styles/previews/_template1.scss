@@ -7,11 +7,11 @@
     font-display: swap;
 }
 
-.billWrap1{
+.billWrap1 {
     font-family: 'Press Start 2P', cursive;
 }
 
-.billWrap{
+.billWrap {
     margin: 0;
     margin-left: 8px;
     height: 100%;
@@ -21,18 +21,18 @@
     font-stretch: extra-condensed;
     position: relative;
 
-    .billBody{
+    .billBody {
         background-color: #f5f7f7;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         width: 260px;
         height: 100%;
-        margin-top: 0px;
+        margin: 0px auto;
         position: relative;
         padding: 5px;
         overflow: hidden;
 
-        .sideLogo{
+        .sideLogo {
             display: flex;
             transform: rotate(270deg);
             right: -50px;
@@ -43,13 +43,13 @@
             filter: grayscale(100%);
             opacity: .35;
             vertical-align: middle;
-    
-            &.sideLogoDown{
+
+            &.sideLogoDown {
                 top: 400px;
             }
         }
 
-        .billLogo{
+        .billLogo {
             display: block;
             margin: 0 auto 5px;
             width: 90px;
@@ -57,29 +57,29 @@
             height: 110px;
         }
 
-        p{
+        p {
 
-            &.top{
+            &.top {
                 text-align: center;
                 line-height: 1.35;
                 margin-bottom: 6px;
             }
 
-            &.bottom{
+            &.bottom {
                 margin-top: 40px;
                 text-align: center;
                 line-height: 1.5;
             }
 
-            &.desc{
+            &.desc {
                 margin-bottom: 10px;
             }
         }
 
-        .billTable{
+        .billTable {
             margin-bottom: 30px;
 
-            .billElement{
+            .billElement {
                 display: flex;
                 justify-content: space-between;
                 margin-top: 0px;

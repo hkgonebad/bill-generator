@@ -1,0 +1,72 @@
+/* 
+  Preview Watermark Styles
+  This file contains styles for the watermark that appears on bill previews
+  to prevent screenshots from being used as final documents.
+*/
+
+.preview-area {
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-watermark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.1);
+    transform: rotate(-45deg);
+    pointer-events: none;
+    z-index: 10;
+    user-select: none;
+
+    /* This will ensure the watermark appears in screenshots */
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Add a subtle animation to make screenshots less useful */
+@keyframes watermark-pulse {
+    0% {
+        opacity: 0.1;
+    }
+
+    50% {
+        opacity: 0.15;
+    }
+
+    100% {
+        opacity: 0.1;
+    }
+}
+
+.preview-watermark {
+    animation: watermark-pulse 3s infinite;
+}
+
+/* Add a unique identifier to each preview that includes timestamp */
+.preview-area::after {
+    content: attr(data-preview-id);
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 8px;
+    color: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+/* Hide watermark when printing or generating PDFs */
+@media print {
+    .preview-watermark {
+        display: none !important;
+    }
+
+    .preview-area::after {
+        display: none !important;
+    }
+}

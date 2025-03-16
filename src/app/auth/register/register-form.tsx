@@ -5,7 +5,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Container, Form, Button, Alert, Card, Row, Col } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import Header from "@/components/Header";
+import { UserPlus } from "lucide-react";
 
 export default function RegisterForm() {
   const [name, setName] = useState("");
@@ -83,15 +84,12 @@ export default function RegisterForm() {
 
   return (
     <>
-      <NavbarComponent />
-      <Container className="mt-5">
+      <Header title="Create Account" subtitle="Join Bill Generator" icon={<UserPlus size={24} />} showButton={false} />
+      <Container className="mb-5">
         <Row className="justify-content-center">
           <Col md={6}>
             <Card>
-              <Card.Header className="bg-primary text-white">
-                <h2 className="text-center mb-0">Register</h2>
-              </Card.Header>
-              <Card.Body>
+              <Card.Body className="p-4">
                 {error && <Alert variant="danger">{error}</Alert>}
                 {success && <Alert variant="success">{success}</Alert>}
 

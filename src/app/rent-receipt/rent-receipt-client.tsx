@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Row, Col, Form, Button, Alert, Card, Tab, Nav } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import Header from "@/components/Header";
 import moment from "moment";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -13,6 +13,7 @@ import Template2 from "@/components/rent/Template2";
 import TemplateSelector from "@/components/rent/TemplateSelector";
 import LiveEditor from "@/components/rent/LiveEditor";
 import { convertNumberToWords } from "@/utils/numberToWords";
+import { Receipt } from "lucide-react";
 
 export default function RentReceiptClient() {
   const { data: session, status } = useSession();
@@ -28,6 +29,7 @@ export default function RentReceiptClient() {
     tenantName: "",
     tenantAddress: "",
     rentAmount: 0,
+    rentAmountInWords: "Zero Rupees Only",
     paymentDate: moment().format("YYYY-MM-DD"),
     paymentMode: "Cash",
     receiptNumber: `RENT${moment().format("YYYYMMDD")}${Math.floor(Math.random() * 1000)}`,
@@ -48,7 +50,7 @@ export default function RentReceiptClient() {
   const [validated, setValidated] = useState(false);
 
   // Add field validation states
-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Load bill data if in edit mode
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function RentReceiptClient() {
           }
 
           const bill = data.bill;
+          const rentAmount = bill.rentAmount || 0;
 
           // Set receipt data
           setReceiptData({
@@ -71,7 +74,8 @@ export default function RentReceiptClient() {
             landlordAddress: bill.landlordAddress || "",
             tenantName: bill.tenantName || "",
             tenantAddress: bill.propertyAddress || "",
-            rentAmount: bill.rentAmount || 0,
+            rentAmount: rentAmount,
+            rentAmountInWords: convertNumberToWords(rentAmount),
             paymentDate: bill.paymentDate || moment().format("YYYY-MM-DD"),
             paymentMode: bill.paymentMethod || "Cash",
             receiptNumber: bill.receiptNumber || `RENT${moment().format("YYYYMMDD")}${Math.floor(Math.random() * 1000)}`,
@@ -119,16 +123,115 @@ export default function RentReceiptClient() {
 
   // Handle receipt data change
   const handleReceiptDataChange = (data: Partial<typeof receiptData>) => {
-    setReceiptData((prev) => ({
+    setReceiptData((prev) => {
+      const newData = {
+        ...prev,
+        ...data,
+      };
+
+      // Update rentAmountInWords whenever rentAmount changes
+      if (data.rentAmount !== undefined) {
+        newData.rentAmountInWords = convertNumberToWords(data.rentAmount);
+      }
+
+      return newData;
+    });
+  };
+
+  // Validate individual field
+  const validateField = (field: string, value: any) => {
+    let error = "";
+
+    switch (field) {
+      case "landlordName":
+        if (!value) error = "Landlord name is required";
+        break;
+      case "tenantName":
+        if (!value) error = "Tenant name is required";
+        break;
+      case "tenantAddress":
+        if (!value) error = "Tenant address is required";
+        break;
+      case "rentAmount":
+        if (!value) error = "Rent amount is required";
+        else if (value <= 0) error = "Rent amount must be greater than 0";
+        break;
+      case "paymentDate":
+        if (!value) error = "Payment date is required";
+        break;
+      case "rentPeriod.from":
+        if (!value) error = "Period start date is required";
+        break;
+      case "rentPeriod.to":
+        if (!value) error = "Period end date is required";
+        break;
+      case "receiptNumber":
+        if (!value) error = "Receipt number is required";
+        break;
+      default:
+        break;
+    }
+
+    setFieldErrors((prev) => ({
       ...prev,
-      ...data,
+      [field]: error,
     }));
+
+    return !error;
+  };
+
+  // Handle field blur
+  const handleBlur = (field: string, value: any) => {
+    validateField(field, value);
   };
 
   // Validate form before generating PDF
   const validateForm = () => {
-    // Required fields
-    if (!receiptData.landlordName || !receiptData.tenantName || !receiptData.rentAmount || !receiptData.rentPeriod.from || !receiptData.rentPeriod.to || !receiptData.paymentDate) {
+    // Validate all required fields
+    const fields = ["landlordName", "tenantName", "tenantAddress", "rentAmount", "paymentDate", "rentPeriod.from", "rentPeriod.to", "receiptNumber"];
+
+    let isValid = true;
+
+    // Validate each field
+    fields.forEach((field) => {
+      let value;
+      if (field.includes(".")) {
+        const [parent, child] = field.split(".");
+        if (parent === "rentPeriod" && child && (child === "from" || child === "to")) {
+          value = receiptData.rentPeriod[child as "from" | "to"];
+        }
+      } else {
+        // Type-safe field access
+        switch (field) {
+          case "landlordName":
+            value = receiptData.landlordName;
+            break;
+          case "tenantName":
+            value = receiptData.tenantName;
+            break;
+          case "tenantAddress":
+            value = receiptData.tenantAddress;
+            break;
+          case "rentAmount":
+            value = receiptData.rentAmount;
+            break;
+          case "paymentDate":
+            value = receiptData.paymentDate;
+            break;
+          case "receiptNumber":
+            value = receiptData.receiptNumber;
+            break;
+          default:
+            value = "";
+        }
+      }
+
+      if (!validateField(field, value)) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
       setError("Please fill in all required fields");
       setValidated(true);
       return false;
@@ -165,18 +268,63 @@ export default function RentReceiptClient() {
       return;
     }
 
+    // Check credits before generating
+    try {
+      // For authenticated users, check their credits
+      if (status === "authenticated") {
+        const creditsResponse = await fetch("/api/credits");
+        const creditsData = await creditsResponse.json();
+
+        if (creditsData.weeklyBillsGenerated >= creditsData.weeklyBillsLimit) {
+          setError("You have reached your weekly bill generation limit. Please try again next week.");
+          return;
+        }
+      } else {
+        // For anonymous users, check anonymous credits
+        const anonCreditsResponse = await fetch("/api/anonymous-credit");
+        const anonCreditsData = await anonCreditsResponse.json();
+
+        if (anonCreditsData.credits && anonCreditsData.credits.weeklyBillsGenerated >= 2) {
+          setError("You have reached your weekly bill generation limit. Please sign in or create an account to generate more bills.");
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking credits:", error);
+    }
+
     const receiptElement = document.getElementById("receiptPreview");
     if (!receiptElement) return;
 
     try {
       setLoading(true);
 
-      const canvas = await html2canvas(receiptElement, {
+      // Create a temporary clone of the preview area without the watermark
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = receiptElement.innerHTML;
+
+      // Remove the watermark from the clone
+      const watermark = tempDiv.querySelector(".preview-watermark");
+      if (watermark) {
+        watermark.remove();
+      }
+
+      // Append the clone to the body but make it invisible
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.top = "-9999px";
+      document.body.appendChild(tempDiv);
+
+      // Capture the clean version
+      const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
       });
+
+      // Remove the temporary element
+      document.body.removeChild(tempDiv);
 
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
@@ -203,6 +351,18 @@ export default function RentReceiptClient() {
           });
         } catch (error) {
           console.error("Error updating anonymous credit:", error);
+        }
+      } else if (status === "authenticated") {
+        // Update credits for authenticated users
+        try {
+          await fetch("/api/credits/use", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        } catch (error) {
+          console.error("Error updating credits:", error);
         }
       }
 
@@ -293,10 +453,8 @@ export default function RentReceiptClient() {
 
   return (
     <>
-      <NavbarComponent />
-      <Container className="mt-4 mb-5">
-        <h1 className="text-center mb-4">Rent Receipt Generator</h1>
-
+      <Header title="Rent Receipt Generator" subtitle="Create professional rent receipts for your tenants" icon={<Receipt size={24} />} buttonText="View All Tools" buttonLink="/tools" />
+      <Container className="mb-5">
         {error && (
           <Alert variant="danger" className="mb-3">
             {error}
@@ -313,56 +471,86 @@ export default function RentReceiptClient() {
         <Row>
           <Col md={6}>
             <Tab.Container defaultActiveKey="editor">
-              <Card className="mb-4">
-                <Card.Header>
-                  <Nav variant="tabs">
-                    <Nav.Item>
-                      <Nav.Link eventKey="editor">Edit Receipt</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="account">Account Settings</Nav.Link>
-                    </Nav.Item>
-                  </Nav>
-                </Card.Header>
-                <Card.Body>
-                  <Tab.Content>
-                    <Tab.Pane eventKey="editor">
-                      <LiveEditor receiptData={receiptData} onDataChange={handleReceiptDataChange} />
-                    </Tab.Pane>
-                    <Tab.Pane eventKey="account">
-                      <Form.Group className="mb-3">
-                        <Form.Label>Receipt Name (for saving to your account)</Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={billName}
-                          onChange={(e) => setBillName(e.target.value)}
-                          placeholder={`Rent Receipt - ${receiptData.tenantName || "Tenant"} - ${moment(receiptData.rentPeriod.from).format("MMM YYYY")}`}
-                        />
-                      </Form.Group>
+              <Nav variant="tabs" className="">
+                <Nav.Item>
+                  <Nav.Link eventKey="editor">Edit Receipt</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="account">Account Settings</Nav.Link>
+                </Nav.Item>
+              </Nav>
+              <Tab.Content>
+                <Tab.Pane eventKey="editor">
+                  <LiveEditor receiptData={receiptData} onDataChange={handleReceiptDataChange} fieldErrors={fieldErrors} handleBlur={handleBlur} />
+                </Tab.Pane>
+                <Tab.Pane eventKey="account">
+                  <div className="card card-body">
+                    <Form.Group className="mb-3">
+                      <Form.Label>Receipt Name (for saving to your account)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={billName}
+                        onChange={(e) => setBillName(e.target.value)}
+                        placeholder={`Rent Receipt - ${receiptData.tenantName || "Tenant"} - ${moment(receiptData.rentPeriod.from).format("MMM YYYY")}`}
+                      />
+                    </Form.Group>
 
-                      <Form.Check type="checkbox" id="saveToAccount" label="Save to my account" checked={savingToAccount} onChange={(e) => setSavingToAccount(e.target.checked)} className="mb-3" />
+                    <Form.Check type="checkbox" id="saveToAccount" label="Save to my account" checked={savingToAccount} onChange={(e) => setSavingToAccount(e.target.checked)} className="mb-3" />
 
-                      <div className="d-flex gap-2">
-                        <Button variant="primary" onClick={generatePDF} disabled={loading || !receiptData.landlordName || !receiptData.tenantName || !receiptData.tenantAddress || !receiptData.rentAmount}>
-                          {loading ? "Processing..." : "Generate Receipt"}
+                    <div className="d-flex gap-2">
+                      <Button variant="primary" onClick={generatePDF} disabled={loading || !receiptData.landlordName || !receiptData.tenantName || !receiptData.tenantAddress || !receiptData.rentAmount}>
+                        {loading ? "Processing..." : "Generate Receipt"}
+                      </Button>
+
+                      {status === "authenticated" && !savingToAccount && (
+                        <Button variant="success" onClick={saveBill} disabled={loading || !receiptData.landlordName || !receiptData.tenantName || !receiptData.tenantAddress || !receiptData.rentAmount}>
+                          {editMode ? "Update Receipt" : "Save to Account"}
                         </Button>
-
-                        {status === "authenticated" && !savingToAccount && (
-                          <Button variant="success" onClick={saveBill} disabled={loading || !receiptData.landlordName || !receiptData.tenantName || !receiptData.tenantAddress || !receiptData.rentAmount}>
-                            {editMode ? "Update Receipt" : "Save to Account"}
-                          </Button>
-                        )}
-                      </div>
-                    </Tab.Pane>
-                  </Tab.Content>
-                </Card.Body>
-              </Card>
+                      )}
+                    </div>
+                  </div>
+                </Tab.Pane>
+              </Tab.Content>
             </Tab.Container>
           </Col>
 
           <Col md={6}>
-            <div id="receiptPreview" className="preview-area">
-              {selectedTemplate === 1 ? <Template1 {...receiptData} /> : <Template2 {...receiptData} />}
+            <div className="preview-area card">
+              <div className="card-header">
+                <h5 className="card-title m-0">Preview</h5>
+              </div>
+              <div className="card-body" id="receiptPreview" data-preview-id={`preview-${Date.now()}`}>
+                <div className="preview-watermark">PREVIEW</div>
+                {selectedTemplate === 1 ? (
+                  <Template1
+                    landlordName={receiptData.landlordName}
+                    landlordAddress={receiptData.landlordAddress}
+                    tenantName={receiptData.tenantName}
+                    tenantAddress={receiptData.tenantAddress}
+                    rentAmount={receiptData.rentAmount}
+                    rentAmountInWords={receiptData.rentAmountInWords}
+                    paymentDate={receiptData.paymentDate}
+                    paymentMode={receiptData.paymentMode}
+                    receiptNumber={receiptData.receiptNumber}
+                    panNumber={receiptData.panNumber}
+                    rentPeriod={receiptData.rentPeriod}
+                  />
+                ) : (
+                  <Template2
+                    landlordName={receiptData.landlordName}
+                    landlordAddress={receiptData.landlordAddress}
+                    tenantName={receiptData.tenantName}
+                    tenantAddress={receiptData.tenantAddress}
+                    rentAmount={receiptData.rentAmount}
+                    rentAmountInWords={receiptData.rentAmountInWords}
+                    paymentDate={receiptData.paymentDate}
+                    paymentMode={receiptData.paymentMode}
+                    receiptNumber={receiptData.receiptNumber}
+                    panNumber={receiptData.panNumber}
+                    rentPeriod={receiptData.rentPeriod}
+                  />
+                )}
+              </div>
             </div>
           </Col>
         </Row>

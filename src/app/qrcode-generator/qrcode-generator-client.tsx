@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import Header from "@/components/Header";
 import QRCode from "qrcode";
 import html2canvas from "html2canvas";
+import { QrCode } from "lucide-react";
 
 export default function QRCodeGeneratorClient() {
   const [qrValue, setQrValue] = useState("https://example.com");
@@ -56,7 +57,7 @@ export default function QRCodeGeneratorClient() {
 
   return (
     <>
-      <NavbarComponent />
+      <Header title="QR Code Generator" subtitle="Generate QR codes for various purposes" icon={<QrCode size={24} />} buttonText="View All Tools" buttonLink="/tools" />
       <Container className="mt-4 mb-5">
         <h1 className="text-center mb-4">QR Code Generator</h1>
 

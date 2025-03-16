@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Button, Container, Row, Col, Card } from "react-bootstrap";
+import { Modal, Button, Container, Row, Col, Card, Form } from "react-bootstrap";
 import Link from "next/link";
-import NavbarComponent from "../components/NavbarApp";
-import { Receipt, Fuel, Home, Clock, QrCode, FileText, Shield, Info } from "lucide-react";
+import { Receipt, Fuel, Home, Clock, QrCode, FileText, Shield, Info, Lightbulb } from "lucide-react";
 
 export default function HomePage() {
   const [showModal, setShowModal] = useState<string | null>(null);
@@ -43,8 +42,6 @@ export default function HomePage() {
 
   return (
     <>
-      <NavbarComponent />
-
       <div className="hero-section py-5">
         <Container>
           <Row className="align-items-center">
@@ -52,15 +49,11 @@ export default function HomePage() {
               <h1 className="display-4 fw-bold mb-3">Generate Bills & Receipts with Ease</h1>
               <p className="lead mb-4">Create professional bills, receipts, and other documents for personal record keeping or as proof of purchase.</p>
               <div className="d-flex gap-3">
-                <Link href="/dashboard" passHref>
-                  <Button variant="primary" size="lg">
-                    Get Started
-                  </Button>
+                <Link href="/dashboard" className="btn btn-primary btn-lg">
+                  Get Started
                 </Link>
-                <Link href="/tools" passHref>
-                  <Button variant="outline-secondary" size="lg">
-                    Explore Tools
-                  </Button>
+                <Link href="/tools" className="btn btn-outline-primary  btn-lg">
+                  Explore Tools
                 </Link>
               </div>
             </Col>
@@ -81,7 +74,7 @@ export default function HomePage() {
         </Container>
       </div>
 
-      <section className="features-section py-5 bg-light">
+      <section className="features-section py-5">
         <Container>
           <h2 className="text-center mb-5">Our Features</h2>
           <Row>
@@ -98,6 +91,43 @@ export default function HomePage() {
                 </Link>
               </Col>
             ))}
+          </Row>
+        </Container>
+      </section>
+
+      <section className="suggestion-section py-5">
+        <Container>
+          <Row className="align-items-center">
+            <Col lg={6} className="mb-4 mb-lg-0">
+              <div className="d-flex align-items-center mb-3">
+                <div className="suggestion-icon me-3 text-primary">
+                  <Lightbulb size={32} />
+                </div>
+                <h2 className="mb-0">Have a suggestion?</h2>
+              </div>
+              <p className="lead mb-4">We&apos;re constantly adding new tools based on user feedback. Let us know what tool you&apos;d like to see next!</p>
+              <p>Your suggestions help us prioritize new features and tools. Whether you need a specific type of receipt, calculator, or any other utility, we want to hear from you.</p>
+            </Col>
+            <Col lg={6}>
+              <Card className="">
+                <Card.Body className="p-4">
+                  <h3 className="mb-3">Suggest a Tool</h3>
+                  <Form>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Your Suggestion</Form.Label>
+                      <Form.Control as="textarea" rows={3} placeholder="Describe the tool you'd like us to add..." />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Your Email (optional)</Form.Label>
+                      <Form.Control type="email" placeholder="We'll notify you when we add your suggested tool" />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">
+                      Submit Suggestion
+                    </Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
         </Container>
       </section>
@@ -121,7 +151,7 @@ export default function HomePage() {
               </div>
             </Col>
             <Col lg={6}>
-              <Card className="border-0 shadow-sm">
+              <Card className=" shadow-sm">
                 <Card.Body className="p-4">
                   <div className="d-flex align-items-center mb-3">
                     <div className="me-3 text-primary">

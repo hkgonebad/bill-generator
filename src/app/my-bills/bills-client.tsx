@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Container, Row, Col, Card, Tab, Nav, Table, Button, Badge, Modal, Alert, Form, InputGroup, Dropdown } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faEye, faCopy, faSearch, faSortAmountDown, faSortAmountUp, faCalendarAlt, faFilter, faCheckSquare } from "@fortawesome/free-solid-svg-icons";
+import Header from "@/components/Header";
+import { FileText, Trash2, Edit, Download, Filter, Search, Eye, ArrowUp, ArrowDown, SlidersHorizontal, Copy } from "lucide-react";
 import moment from "moment";
 
 const BillTypeBadge = ({ type }: { type: string }) => {
@@ -300,7 +299,7 @@ export default function BillsClient() {
   if (status === "loading") {
     return (
       <>
-        <NavbarComponent />
+        <Header title="My Bills" subtitle="View and manage your saved bills" icon={<FileText size={24} />} buttonText="Create New Bill" buttonLink="/dashboard" />
         <Container className="mt-5 text-center">
           <h3>Loading...</h3>
         </Container>
@@ -311,15 +310,13 @@ export default function BillsClient() {
   if (status === "authenticated") {
     return (
       <>
-        <NavbarComponent />
+        <Header title="My Bills" subtitle="View and manage your saved bills" icon={<FileText size={24} />} buttonText="Create New Bill" buttonLink="/dashboard" />
         <Container className="mt-4 mb-5">
-          <h1 className="mb-4">My Bills</h1>
-
           {error && <Alert variant="danger">{error}</Alert>}
 
           <Tab.Container defaultActiveKey="all">
             <Card className="shadow-sm">
-              <Card.Header className="bg-white">
+              <Card.Header className="">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <Nav variant="tabs">
                     <Nav.Item>
@@ -335,7 +332,7 @@ export default function BillsClient() {
 
                   {selectedBills.length > 0 && (
                     <Button variant="danger" size="sm" onClick={() => setShowMultiDeleteModal(true)}>
-                      <FontAwesomeIcon icon={faTrash} className="me-1" />
+                      <Trash2 size={16} className="me-1" />
                       Delete Selected ({selectedBills.length})
                     </Button>
                   )}
@@ -344,26 +341,26 @@ export default function BillsClient() {
                 <div className="d-flex flex-wrap gap-2 align-items-center">
                   <InputGroup className="w-auto flex-grow-1">
                     <InputGroup.Text>
-                      <FontAwesomeIcon icon={faSearch} />
+                      <Search size={16} />
                     </InputGroup.Text>
                     <Form.Control placeholder="Search bills..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   </InputGroup>
 
                   <InputGroup className="w-auto">
                     <InputGroup.Text>
-                      <FontAwesomeIcon icon={faCalendarAlt} />
+                      <Filter size={16} />
                     </InputGroup.Text>
                     <Form.Control type="date" value={dateFilter || ""} onChange={(e) => setDateFilter(e.target.value || null)} />
                   </InputGroup>
 
                   <Button variant="outline-secondary" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                    <FontAwesomeIcon icon={sortOrder === "asc" ? faSortAmountUp : faSortAmountDown} className="me-1" />
+                    {sortOrder === "asc" ? <ArrowUp size={16} className="me-1" /> : <ArrowDown size={16} className="me-1" />}
                     {sortOrder === "asc" ? "Oldest First" : "Newest First"}
                   </Button>
 
                   {(searchTerm || dateFilter || sortOrder !== "desc") && (
                     <Button variant="outline-secondary" onClick={clearFilters}>
-                      <FontAwesomeIcon icon={faFilter} className="me-1" />
+                      <Filter size={16} className="me-1" />
                       Clear Filters
                     </Button>
                   )}
@@ -385,12 +382,12 @@ export default function BillsClient() {
                           <Table hover className="align-middle">
                             <thead>
                               <tr>
-                                <th width="40">
+                                <th style={{ width: "40px" }}>
                                   <Form.Check type="checkbox" checked={selectAll} onChange={() => toggleSelectAll(tabKey)} aria-label="Select all bills" />
                                 </th>
                                 <th>Name</th>
                                 {tabKey === "all" && <th>Type</th>}
-                                <th>Date Created</th>
+                                <th>Date</th>
                                 <th>Actions</th>
                               </tr>
                             </thead>
@@ -409,17 +406,17 @@ export default function BillsClient() {
                                   <td>{moment(bill.createdAt).format("MMM D, YYYY")}</td>
                                   <td>
                                     <div className="d-flex gap-1">
-                                      <Button variant="outline-primary" size="sm" onClick={() => handleView(bill)} title="View">
-                                        <FontAwesomeIcon icon={faEye} />
+                                      <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleView(bill)}>
+                                        <Eye size={14} />
                                       </Button>
-                                      <Button variant="outline-secondary" size="sm" onClick={() => handleEdit(bill)} title="Edit">
-                                        <FontAwesomeIcon icon={faEdit} />
+                                      <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => handleEdit(bill)}>
+                                        <Edit size={14} />
                                       </Button>
                                       <Button variant="outline-success" size="sm" onClick={() => handleDuplicate(bill)} title="Duplicate">
-                                        <FontAwesomeIcon icon={faCopy} />
+                                        <Copy size={14} />
                                       </Button>
                                       <Button variant="outline-danger" size="sm" onClick={() => confirmDelete(bill)} title="Delete">
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        <Trash2 size={14} />
                                       </Button>
                                     </div>
                                   </td>
@@ -442,7 +439,7 @@ export default function BillsClient() {
           <Modal.Header closeButton>
             <Modal.Title>Confirm Delete</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Are you sure you want to delete "{selectedBill?.name}"? This action cannot be undone.</Modal.Body>
+          <Modal.Body>Are you sure you want to delete &quot;{selectedBill?.name}&quot;?</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel

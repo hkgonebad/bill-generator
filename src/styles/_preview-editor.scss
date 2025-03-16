@@ -1,0 +1,30 @@
+// Template preview area
+.preview-area {
+    min-height: 500px;
+    overflow: auto;
+}
+
+// Special canvas for live editor
+.live-editor-canvas {
+    min-height: 500px;
+
+    @extend .card, .card-body;
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .editor-section {
+
+        &:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--bs-primary);
+        }
+    }
+}

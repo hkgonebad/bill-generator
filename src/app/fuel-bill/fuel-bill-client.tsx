@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import { Container, Row, Col, Form, Button, Alert, Tab, Nav } from "react-bootstrap";
+import Header from "@/components/Header";
 import moment from "moment";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import html2canvas from "html2canvas";
+import { Fuel } from "lucide-react";
+import LiveEditor from "@/components/fuel/LiveEditor";
+import TemplateSelector from "@/components/fuel/TemplateSelector";
+import { jsPDF } from "jspdf";
 
 // Import fuel bill templates
 import FuelTemplate1 from "@/fuel/template1";
@@ -174,7 +178,7 @@ export default function FuelBillClient() {
   const [validated, setValidated] = useState(false);
 
   // Add field validation states
-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Validate individual field
   const validateField = (field: string, value: any) => {
@@ -289,25 +293,78 @@ export default function FuelBillClient() {
       return;
     }
 
+    // Check credits before generating
+    try {
+      // For authenticated users, check their credits
+      if (status === "authenticated") {
+        const creditsResponse = await fetch("/api/credits");
+        const creditsData = await creditsResponse.json();
+
+        if (creditsData.weeklyBillsGenerated >= creditsData.weeklyBillsLimit) {
+          setError("You have reached your weekly bill generation limit. Please try again next week.");
+          return;
+        }
+      } else {
+        // For anonymous users, check anonymous credits
+        const anonCreditsResponse = await fetch("/api/anonymous-credit");
+        const anonCreditsData = await anonCreditsResponse.json();
+
+        if (anonCreditsData.credits && anonCreditsData.credits.weeklyBillsGenerated >= 2) {
+          setError("You have reached your weekly bill generation limit. Please sign in or create an account to generate more bills.");
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking credits:", error);
+    }
+
     const previewArea = document.getElementById("previewArea");
     if (!previewArea) return;
 
     try {
-      const canvas = await html2canvas(previewArea, {
+      setLoading(true);
+
+      // Create a temporary clone of the preview area without the watermark
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = previewArea.innerHTML;
+
+      // Remove the watermark from the clone
+      const watermark = tempDiv.querySelector(".preview-watermark");
+      if (watermark) {
+        watermark.remove();
+      }
+
+      // Append the clone to the body but make it invisible
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.top = "-9999px";
+      document.body.appendChild(tempDiv);
+
+      // Capture the clean version
+      const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        backgroundColor: "#ffffff",
       });
+
+      // Remove the temporary element
+      document.body.removeChild(tempDiv);
 
       const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-      // Create a temporary link and trigger download
-      const link = document.createElement("a");
-      link.href = imgData;
-      link.download = `FuelBill_${invoiceNumber}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Create PDF from the image
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`FuelBill_${invoiceNumber}.pdf`);
 
       // Update anonymous credit if not logged in
       if (status === "unauthenticated") {
@@ -321,14 +378,28 @@ export default function FuelBillClient() {
         } catch (error) {
           console.error("Error updating anonymous credit:", error);
         }
+      } else if (status === "authenticated") {
+        // Update credits for authenticated users
+        try {
+          await fetch("/api/credits/use", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        } catch (error) {
+          console.error("Error updating credits:", error);
+        }
       }
 
       if (savingToAccount && status === "authenticated") {
         saveBill();
       }
     } catch (error) {
-      console.error("Error generating JPG:", error);
-      setError("Failed to generate bill image. Please try again.");
+      console.error("Error generating PDF:", error);
+      setError("Failed to generate bill. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -408,277 +479,178 @@ export default function FuelBillClient() {
     }
   };
 
+  // Add a handleDataChange function
+  const handleDataChange = (field: string, value: any) => {
+    switch (field) {
+      case "selectedTemplate":
+        setSelectedTemplate(value);
+        break;
+      case "selectedBrand":
+        setSelectedBrand(value);
+        break;
+      case "fsName":
+        setFsName(value);
+        break;
+      case "fsAddress":
+        setFsAddress(value);
+        break;
+      case "fsTel":
+        setFsTel(value);
+        break;
+      case "fsRate":
+        setFsRate(value);
+        break;
+      case "fsTotal":
+        setFsTotal(value);
+        break;
+      case "csName":
+        setCsName(value);
+        break;
+      case "csTel":
+        setCsTel(value);
+        break;
+      case "vehNumber":
+        setVehNumber(value);
+        break;
+      case "vehType":
+        setVehType(value);
+        break;
+      case "paymentType":
+        setPaymentType(value);
+        break;
+      case "selectedTaxOption":
+        setSelectedTaxOption(value);
+        break;
+      case "taxNumber":
+        setTaxNumber(value);
+        break;
+      case "fsDate":
+        setFsDate(value);
+        break;
+      case "fsTime":
+        setFsTime(value);
+        break;
+      case "invoiceNumber":
+        setInvoiceNumber(value);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <>
-      <NavbarComponent />
-      <section className="fuel-bill">
-        <Container>
-          <h1 className="text-center mb-4">Fuel Bill Generator</h1>
+      <Header title="Fuel Bill Generator" subtitle="Create professional fuel bills with automatic calculations" icon={<Fuel size={24} />} buttonText="View All Tools" buttonLink="/tools" />
+      <Container className="mb-5">
+        {error && (
+          <Alert variant="danger" className="mb-3">
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert variant="success" className="mb-3">
+            {success}
+          </Alert>
+        )}
 
-          {error && (
-            <Alert variant="danger" className="mb-3">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-3">
-              {success}
-            </Alert>
-          )}
+        <TemplateSelector selectedTemplate={selectedTemplate} onSelectTemplate={(template) => setSelectedTemplate(template)} />
 
-          <Row>
-            <Col md={6}>
-              <div className="form-container">
-                <Form noValidate validated={validated}>
-                  <Row>
-                    <Col md={6}>
-                      <Form.Group controlId="template">
-                        <Form.Label>
-                          Template <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)} onBlur={() => handleBlur("template", selectedTemplate)} required isInvalid={!!fieldErrors.template}>
-                          <option value="template1">Template 1</option>
-                          <option value="template2">Template 2</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">{fieldErrors.template || "Please select a template."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
+        <Row>
+          <Col md={6}>
+            <Tab.Container defaultActiveKey="editor">
+              <Nav variant="tabs" className="">
+                <Nav.Item>
+                  <Nav.Link eventKey="editor">Edit Bill</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="account">Account Settings</Nav.Link>
+                </Nav.Item>
+              </Nav>
+              <Tab.Content>
+                <Tab.Pane eventKey="editor">
+                  <LiveEditor
+                    fuelData={{
+                      selectedTemplate,
+                      selectedBrand,
+                      fsName,
+                      fsAddress,
+                      fsTel,
+                      fsRate,
+                      fsTotal,
+                      fsVolume,
+                      csName,
+                      csTel,
+                      vehNumber,
+                      vehType,
+                      paymentType,
+                      selectedTaxOption,
+                      taxNumber,
+                      fsDate,
+                      fsTime,
+                      invoiceNumber,
+                      fieldErrors,
+                      handleBlur,
+                    }}
+                    onDataChange={handleDataChange}
+                  />
+                </Tab.Pane>
+                <Tab.Pane eventKey="account">
+                  <div className="card card-body">
+                    <Form.Group className="mb-3">
+                      <Form.Label>Bill Name (for saving to your account)</Form.Label>
+                      <Form.Control type="text" value={billName} onChange={(e) => setBillName(e.target.value)} placeholder={`Fuel Bill - ${fsName || "Station"} - ${moment().format("MMM YYYY")}`} />
+                    </Form.Group>
 
-                    <Col md={6}>
-                      <Form.Group controlId="brand">
-                        <Form.Label>
-                          Brand <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} onBlur={() => handleBlur("brand", selectedBrand)} required isInvalid={!!fieldErrors.brand}>
-                          <option value="bp">Bharat Petroleum</option>
-                          <option value="hp">Hindustan Petroleum</option>
-                          <option value="io">Indian Oil</option>
-                          <option value="eo">Essar Oil</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">{fieldErrors.brand || "Please select a brand."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
+                    <Form.Check type="checkbox" id="saveToAccount" label="Save to my account" checked={savingToAccount} onChange={(e) => setSavingToAccount(e.target.checked)} className="mb-3" />
 
-                    <Col md={12}>
-                      <Form.Group controlId="fsName">
-                        <Form.Label>
-                          Fuel Station Name <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control type="text" value={fsName} onChange={(e) => setFsName(e.target.value)} onBlur={() => handleBlur("fsName", fsName)} placeholder="Enter Fuel Station Name" required isInvalid={!!fieldErrors.fsName} />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsName || "Please enter the fuel station name."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
+                    <div className="d-flex gap-2">
+                      <Button variant="primary" onClick={generateJPG} disabled={loading || !fsName || !fsAddress || !fsRate || !fsTotal}>
+                        {loading ? "Processing..." : "Generate PDF"}
+                      </Button>
 
-                    <Col md={12}>
-                      <Form.Group controlId="fsAddress">
-                        <Form.Label>
-                          Fuel Station Address <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={fsAddress}
-                          onChange={(e) => setFsAddress(e.target.value)}
-                          onBlur={() => handleBlur("fsAddress", fsAddress)}
-                          placeholder="Enter Fuel Station Address"
-                          required
-                          isInvalid={!!fieldErrors.fsAddress}
-                        />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsAddress || "Please enter the fuel station address."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={12}>
-                      <Form.Group controlId="fsTel">
-                        <Form.Label>Fuel Station Tel</Form.Label>
-                        <Form.Control type="text" value={fsTel} onChange={(e) => setFsTel(e.target.value)} placeholder="Enter Fuel Station Tel" />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="fsRate">
-                        <Form.Label>
-                          Rate (₹) <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          value={fsRate}
-                          onChange={(e) => setFsRate(parseFloat(e.target.value))}
-                          onBlur={() => handleBlur("fsRate", fsRate)}
-                          onKeyDown={restrictToNumbers}
-                          placeholder="Enter Rate"
-                          required
-                          isInvalid={!!fieldErrors.fsRate}
-                        />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsRate || "Please enter a valid rate."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="fsTotal">
-                        <Form.Label>
-                          Total (₹) <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          value={fsTotal}
-                          onChange={handleFsTotalChange}
-                          onBlur={() => handleBlur("fsTotal", fsTotal)}
-                          onKeyDown={restrictToNumbers}
-                          placeholder="Enter Total"
-                          required
-                          isInvalid={!!fieldErrors.fsTotal}
-                        />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsTotal || "Please enter a valid total amount."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={4}>
-                      <Form.Group controlId="fsVolume">
-                        <Form.Label>
-                          Volume (Liters) <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control type="number" value={fsVolume} readOnly disabled />
-                        <Form.Text className="text-muted">Auto-calculated</Form.Text>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={4}>
-                      <Form.Group controlId="fsDate">
-                        <Form.Label>
-                          Date <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control type="text" value={fsDate} onChange={(e) => setFsDate(e.target.value)} onBlur={() => handleBlur("fsDate", fsDate)} placeholder="DD/MM/YYYY" required isInvalid={!!fieldErrors.fsDate} />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsDate || "Please enter a date."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={4}>
-                      <Form.Group controlId="fsTime">
-                        <Form.Label>
-                          Time <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control type="text" value={fsTime} onChange={(e) => setFsTime(e.target.value)} onBlur={() => handleBlur("fsTime", fsTime)} placeholder="HH:MM" required isInvalid={!!fieldErrors.fsTime} />
-                        <Form.Control.Feedback type="invalid">{fieldErrors.fsTime || "Please enter a time."}</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="csName">
-                        <Form.Label>Customer Name</Form.Label>
-                        <Form.Control type="text" value={csName} onChange={(e) => setCsName(e.target.value)} placeholder="Enter Customer Name" />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="csTel">
-                        <Form.Label>Customer Tel</Form.Label>
-                        <Form.Control type="text" value={csTel} onChange={(e) => setCsTel(e.target.value)} placeholder="Enter Customer Tel" />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="vehNumber">
-                        <Form.Label>Vehicle Number</Form.Label>
-                        <Form.Control type="text" value={vehNumber} onChange={(e) => setVehNumber(e.target.value)} placeholder="Enter Vehicle Number" />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group controlId="vehType">
-                        <Form.Label>Vehicle Type</Form.Label>
-                        <Form.Control type="text" value={vehType} onChange={(e) => setVehType(e.target.value)} placeholder="Enter Vehicle Type" />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={12}>
-                      <Form.Group controlId="paymentType">
-                        <Form.Label>Payment Type</Form.Label>
-                        <Form.Select value={paymentType} onChange={(e) => setPaymentType(e.target.value)}>
-                          <option value="">Select Payment Type</option>
-                          <option value="Cash">Cash</option>
-                          <option value="Card">Card</option>
-                          <option value="UPI">UPI</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={12}>
-                      <Form.Label>Tax Option</Form.Label>
-                      <div className="d-flex gap-3">
-                        <Form.Check type="radio" id="taxOptionNone" label="None" name="taxOption" value="none" checked={selectedTaxOption === "none"} onChange={handleTaxOption} />
-                        <Form.Check type="radio" id="taxOptionGST" label="GST No." name="taxOption" value="GST No." checked={selectedTaxOption === "GST No."} onChange={handleTaxOption} />
-                        <Form.Check type="radio" id="taxOptionTIN" label="TIN No." name="taxOption" value="TIN No." checked={selectedTaxOption === "TIN No."} onChange={handleTaxOption} />
-                      </div>
-                    </Col>
-
-                    {selectedTaxOption !== "none" && (
-                      <Col md={12}>
-                        <Form.Group controlId="taxNumber">
-                          <Form.Label>Enter {selectedTaxOption}</Form.Label>
-                          <Form.Control type="text" value={taxNumber} onChange={(e) => setTaxNumber(e.target.value)} />
-                        </Form.Group>
-                      </Col>
-                    )}
-
-                    {status === "authenticated" && (
-                      <Col md={12} className="mt-3">
-                        <Form.Group controlId="billName">
-                          <Form.Label>Bill Name (for saving to your account)</Form.Label>
-                          <Form.Control type="text" value={billName} onChange={(e) => setBillName(e.target.value)} placeholder={`Fuel Bill - ${fsName || "Unnamed"} - ${fsDate}`} />
-                        </Form.Group>
-
-                        <Form.Check type="checkbox" id="saveToAccount" label="Save to my account" checked={savingToAccount} onChange={(e) => setSavingToAccount(e.target.checked)} className="mt-2" />
-                      </Col>
-                    )}
-
-                    <Col md={12} className="mt-3">
-                      <div className="d-flex gap-2">
-                        <Button variant="primary" onClick={generateJPG} disabled={loading || (!fsName && !fsRate && !fsTotal)}>
-                          {loading ? "Processing..." : "Generate Bill"}
+                      {status === "authenticated" && !savingToAccount && (
+                        <Button variant="success" onClick={saveBill} disabled={loading || !fsName || !fsAddress || !fsRate || !fsTotal}>
+                          {editMode ? "Update Bill" : "Save to Account"}
                         </Button>
+                      )}
+                    </div>
+                  </div>
+                </Tab.Pane>
+              </Tab.Content>
+            </Tab.Container>
+          </Col>
 
-                        {status === "authenticated" && !savingToAccount && (
-                          <Button variant="success" onClick={saveBill} disabled={loading}>
-                            {editMode ? "Update Bill" : "Save to Account"}
-                          </Button>
-                        )}
-                      </div>
-                    </Col>
-                  </Row>
-                </Form>
+          <Col md={6}>
+            <div className="preview-area card">
+              <div className="card-header">
+                <h5 className="card-title m-0">Preview</h5>
               </div>
-            </Col>
-
-            <Col md={6}>
-              <div className="previewArea" id="previewArea">
+              <div className="card-body" id="previewArea" data-preview-id={`preview-${Date.now()}`}>
+                <div className="preview-watermark">PREVIEW</div>
                 <SelectedTemplateComponent
-                  logo={selectedLogo}
                   fsName={fsName}
                   fsAddress={fsAddress}
                   fsTel={fsTel}
                   fsRate={fsRate}
                   fsTotal={fsTotal}
                   fsVolume={fsVolume}
-                  fsDate={fsDate}
-                  fsTime={fsTime}
                   csName={csName}
                   csTel={csTel}
                   vehNumber={vehNumber}
                   vehType={vehType}
                   paymentType={paymentType}
-                  invoiceNumber={invoiceNumber}
                   selectedTaxOption={selectedTaxOption}
                   taxNumber={taxNumber}
+                  fsDate={fsDate}
+                  fsTime={fsTime}
+                  invoiceNumber={invoiceNumber}
+                  logo={selectedLogo}
                 />
               </div>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+            </div>
+          </Col>
+        </Row>
+      </Container>
     </>
   );
 }

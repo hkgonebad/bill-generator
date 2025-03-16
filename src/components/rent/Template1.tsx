@@ -8,6 +8,7 @@ export interface RentReceiptProps {
   tenantName: string;
   tenantAddress: string;
   rentAmount: number;
+  rentAmountInWords: string;
   paymentDate: string;
   paymentMode: string;
   receiptNumber: string;

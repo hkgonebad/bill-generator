@@ -5,7 +5,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Container, Form, Button, Alert, Card, Row, Col } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import Header from "@/components/Header";
+import { LogIn } from "lucide-react";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -47,38 +48,34 @@ export default function SignInForm() {
 
   return (
     <>
-      <NavbarComponent />
-      <Container className="mt-5">
+      <Header title="Sign In" subtitle="Access your account" icon={<LogIn size={24} />} showButton={false} />
+      <Container className="mb-5">
         <Row className="justify-content-center">
-          <Col md={6}>
+          <Col md={6} lg={5}>
             <Card>
-              <Card.Header className="bg-primary text-white">
-                <h2 className="text-center mb-0">Sign In</h2>
-              </Card.Header>
-              <Card.Body>
+              <Card.Body className="p-4">
                 {error && <Alert variant="danger">{error}</Alert>}
-
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="email" className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
+                  <Form.Group className="mb-3" controlId="email">
+                    <Form.Label>Email Address</Form.Label>
+                    <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </Form.Group>
 
-                  <Form.Group controlId="password" className="mb-3">
+                  <Form.Group className="mb-3" controlId="password">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
+                    <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                   </Form.Group>
 
-                  <div className="d-grid gap-2">
+                  <div className="d-grid">
                     <Button variant="primary" type="submit" disabled={loading}>
-                      {loading ? "Signing In..." : "Sign In"}
+                      {loading ? "Signing in..." : "Sign In"}
                     </Button>
                   </div>
                 </Form>
 
-                <div className="text-center mt-3">
+                <div className="mt-3 text-center">
                   <p>
-                    Don't have an account? <Link href="/auth/register">Register</Link>
+                    Don&apos;t have an account? <Link href="/auth/register">Register</Link>
                   </p>
                 </div>
               </Card.Body>

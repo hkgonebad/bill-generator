@@ -2,14 +2,14 @@ import React from "react";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
 interface TemplateSelectorProps {
-  selectedTemplate: number;
-  onSelectTemplate: (templateId: number) => void;
+  selectedTemplate: string;
+  onSelectTemplate: (templateId: string) => void;
 }
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({ selectedTemplate, onSelectTemplate }) => {
   const templates = [
-    { id: 1, name: "Template 1" },
-    { id: 2, name: "Template 2" },
+    { id: "template1", name: "Template 1" },
+    { id: "template2", name: "Template 2" },
   ];
 
   return (
@@ -26,7 +26,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ selectedTemplate, o
               name="template"
               value={template.id}
               checked={selectedTemplate === template.id}
-              onChange={(e) => onSelectTemplate(Number(e.currentTarget.value))}
+              onChange={(e) => onSelectTemplate(e.currentTarget.value)}
             >
               {template.name}
             </ToggleButton>

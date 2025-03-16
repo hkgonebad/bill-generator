@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Container, Row, Col, Form, InputGroup, Card, Table, Alert } from "react-bootstrap";
-import NavbarComponent from "@/components/NavbarApp";
+import Header from "@/components/Header";
 import moment from "moment";
+import { Clock } from "lucide-react";
 
 interface DayTimeData {
   day: string;
@@ -115,7 +116,7 @@ export default function WeeklyTimeCalculatorClient() {
 
   return (
     <>
-      <NavbarComponent />
+      <Header title="Weekly Time Calculator" subtitle="Track and calculate your weekly working hours" icon={<Clock size={24} />} buttonText="View All Tools" buttonLink="/tools" />
       <Container className="mt-4 mb-5">
         <h1 className="text-center mb-4">Weekly Time Calculator</h1>
 
@@ -168,7 +169,7 @@ export default function WeeklyTimeCalculatorClient() {
                 <div className="mt-2">
                   {weeklyTarget ? (
                     <Alert variant="success" className="mb-0">
-                      You've met your weekly target! 🎉
+                      You&apos;ve met your weekly target! 🎉
                     </Alert>
                   ) : (
                     <Alert variant="warning" className="mb-0">

@@ -1,13 +1,11 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Your rule content
 
-- You can @ files here
-- You can use markdown but dont have to
 
 Always write neat and easily readable code, avoid comments. 
 Always write console.logs for errors to identify if something isnt working.

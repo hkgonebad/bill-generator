@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+Bootstrap is imported in scss, and for js, react-bootstrap is there, so need to add separately.
+Check folder structure and existing files before creating any new files/folder to avoid duplicates.
+Write modular code if the page length goes larger, split code for that specific component.
