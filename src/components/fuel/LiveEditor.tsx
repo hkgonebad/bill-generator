@@ -50,24 +50,6 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ fuelData, onDataChange }) => {
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>
-                Template <span className="text-danger">*</span>
-              </Form.Label>
-              <Form.Select
-                value={fuelData.selectedTemplate}
-                onChange={(e) => handleChange("selectedTemplate", e.target.value)}
-                onBlur={() => fuelData.handleBlur("template", fuelData.selectedTemplate)}
-                isInvalid={!!fuelData.fieldErrors.template}
-                required
-              >
-                <option value="template1">Template 1</option>
-                <option value="template2">Template 2</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{fuelData.fieldErrors.template}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>
                 Brand <span className="text-danger">*</span>
               </Form.Label>
               <Form.Select value={fuelData.selectedBrand} onChange={(e) => handleChange("selectedBrand", e.target.value)} onBlur={() => fuelData.handleBlur("brand", fuelData.selectedBrand)} isInvalid={!!fuelData.fieldErrors.brand} required>
@@ -79,14 +61,14 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ fuelData, onDataChange }) => {
               <Form.Control.Feedback type="invalid">{fuelData.fieldErrors.brand}</Form.Control.Feedback>
             </Form.Group>
           </Col>
-        </Row>
-        <Row>
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Invoice Number</Form.Label>
               <Form.Control type="text" value={fuelData.invoiceNumber} onChange={(e) => handleChange("invoiceNumber", e.target.value)} />
             </Form.Group>
           </Col>
+        </Row>
+        <Row>
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Payment Type</Form.Label>

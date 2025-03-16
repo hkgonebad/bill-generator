@@ -202,7 +202,7 @@ export default function RentReceiptClient() {
 
   return (
     <GenericBill
-      billType="Rent Reciept"
+      billType="rent"
       icon={<Receipt size={24} />}
       title="Rent Receipt Generator"
       subtitle="Create professional rent receipts for your tenants"
