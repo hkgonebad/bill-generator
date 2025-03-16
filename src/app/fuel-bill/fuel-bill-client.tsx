@@ -13,6 +13,8 @@ import { Fuel } from "lucide-react";
 import LiveEditor from "@/components/fuel/LiveEditor";
 import TemplateSelector from "@/components/fuel/TemplateSelector";
 import { jsPDF } from "jspdf";
+import { generatePDF, checkCredits, updateCredits } from "@/utils/billGeneration";
+import { required, minValue } from "@/utils/formValidation";
 
 // Import fuel bill templates
 import FuelTemplate1 from "@/fuel/template1";
@@ -186,30 +188,28 @@ export default function FuelBillClient() {
 
     switch (field) {
       case "template":
-        if (!value) error = "Template is required";
+        error = required("Template")(value) || "";
         break;
       case "brand":
-        if (!value) error = "Brand is required";
+        error = required("Brand")(value) || "";
         break;
       case "fsName":
-        if (!value) error = "Fuel station name is required";
+        error = required("Fuel station name")(value) || "";
         break;
       case "fsAddress":
-        if (!value) error = "Fuel station address is required";
+        error = required("Fuel station address")(value) || "";
         break;
       case "fsRate":
-        if (!value) error = "Rate is required";
-        else if (value <= 0) error = "Rate must be greater than 0";
+        error = required("Rate")(value) || minValue(0.01, "Rate")(value) || "";
         break;
       case "fsTotal":
-        if (!value) error = "Total amount is required";
-        else if (value <= 0) error = "Total amount must be greater than 0";
+        error = required("Total amount")(value) || minValue(0.01, "Total amount")(value) || "";
         break;
       case "fsDate":
-        if (!value) error = "Date is required";
+        error = required("Date")(value) || "";
         break;
       case "fsTime":
-        if (!value) error = "Time is required";
+        error = required("Time")(value) || "";
         break;
       default:
         break;
@@ -287,35 +287,19 @@ export default function FuelBillClient() {
     return true;
   };
 
-  // Generate JPG of the bill
-  const generateJPG = async () => {
+  // Generate PDF
+  const handleGeneratePDF = async () => {
     if (!validateForm()) {
       return;
     }
 
-    // Check credits before generating
+    // Check credits
     try {
-      // For authenticated users, check their credits
-      if (status === "authenticated") {
-        const creditsResponse = await fetch("/api/credits");
-        const creditsData = await creditsResponse.json();
-
-        if (creditsData.weeklyBillsGenerated >= creditsData.weeklyBillsLimit) {
-          setError("You have reached your weekly bill generation limit. Please try again next week.");
-          return;
-        }
-      } else {
-        // For anonymous users, check anonymous credits
-        const anonCreditsResponse = await fetch("/api/anonymous-credit");
-        const anonCreditsData = await anonCreditsResponse.json();
-
-        if (anonCreditsData.credits && anonCreditsData.credits.weeklyBillsGenerated >= 2) {
-          setError("You have reached your weekly bill generation limit. Please sign in or create an account to generate more bills.");
-          return;
-        }
-      }
+      const hasCredits = await checkCredits(status, setError);
+      if (!hasCredits) return;
     } catch (error) {
       console.error("Error checking credits:", error);
+      return;
     }
 
     const previewArea = document.getElementById("previewArea");
@@ -324,79 +308,30 @@ export default function FuelBillClient() {
     try {
       setLoading(true);
 
-      // Create a temporary clone of the preview area without the watermark
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = previewArea.innerHTML;
+      // Generate the PDF using the utility function
+      await generatePDF({
+        elementId: "previewArea",
+        fileName: `FuelBill_${invoiceNumber}.pdf`,
+        successCallback: async () => {
+          try {
+            // Update credits
+            await updateCredits(status);
 
-      // Remove the watermark from the clone
-      const watermark = tempDiv.querySelector(".preview-watermark");
-      if (watermark) {
-        watermark.remove();
-      }
-
-      // Append the clone to the body but make it invisible
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.top = "-9999px";
-      document.body.appendChild(tempDiv);
-
-      // Capture the clean version
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
+            // Save bill if needed
+            if (savingToAccount && status === "authenticated") {
+              saveBill();
+            }
+          } catch (error) {
+            console.error("Error after PDF generation:", error);
+          }
+        },
+        errorCallback: (error) => {
+          console.error("Error generating PDF:", error);
+          setError("Failed to generate bill. Please try again.");
+        },
       });
-
-      // Remove the temporary element
-      document.body.removeChild(tempDiv);
-
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-
-      // Create PDF from the image
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`FuelBill_${invoiceNumber}.pdf`);
-
-      // Update anonymous credit if not logged in
-      if (status === "unauthenticated") {
-        try {
-          await fetch("/api/anonymous-credit", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-        } catch (error) {
-          console.error("Error updating anonymous credit:", error);
-        }
-      } else if (status === "authenticated") {
-        // Update credits for authenticated users
-        try {
-          await fetch("/api/credits/use", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-        } catch (error) {
-          console.error("Error updating credits:", error);
-        }
-      }
-
-      if (savingToAccount && status === "authenticated") {
-        saveBill();
-      }
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error in PDF generation:", error);
       setError("Failed to generate bill. Please try again.");
     } finally {
       setLoading(false);
@@ -604,7 +539,7 @@ export default function FuelBillClient() {
                     <Form.Check type="checkbox" id="saveToAccount" label="Save to my account" checked={savingToAccount} onChange={(e) => setSavingToAccount(e.target.checked)} className="mb-3" />
 
                     <div className="d-flex gap-2">
-                      <Button variant="primary" onClick={generateJPG} disabled={loading || !fsName || !fsAddress || !fsRate || !fsTotal}>
+                      <Button variant="primary" onClick={handleGeneratePDF} disabled={loading || !fsName || !fsAddress || !fsRate || !fsTotal}>
                         {loading ? "Processing..." : "Generate PDF"}
                       </Button>
 

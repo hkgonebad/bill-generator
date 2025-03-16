@@ -3,11 +3,26 @@ import moment from "moment";
 import { convertNumberToWords } from "@/utils/numberToWords";
 import { RentReceiptProps } from "./Template1";
 
-const Template2: React.FC<RentReceiptProps> = ({ landlordName, landlordAddress, tenantName, tenantAddress, rentAmount, paymentDate, paymentMode, receiptNumber, panNumber, rentPeriod }) => {
+const Template2: React.FC<RentReceiptProps> = ({
+  landlordName = "",
+  landlordAddress = "",
+  tenantName = "",
+  tenantAddress = "",
+  rentAmount = 0,
+  rentAmountInWords = "",
+  paymentDate = moment().format("YYYY-MM-DD"),
+  paymentMode = "Cash",
+  receiptNumber = "",
+  panNumber = "",
+  rentPeriod = {
+    from: moment().startOf("month").format("YYYY-MM-DD"),
+    to: moment().endOf("month").format("YYYY-MM-DD"),
+  },
+}) => {
   const formattedPaymentDate = moment(paymentDate).format("DD MMMM YYYY");
   const formattedFromDate = moment(rentPeriod.from).format("DD MMMM YYYY");
   const formattedToDate = moment(rentPeriod.to).format("DD MMMM YYYY");
-  const amountInWords = convertNumberToWords(rentAmount);
+  const amountInWords = rentAmountInWords || convertNumberToWords(rentAmount);
 
   return (
     <div className="rent-receipt template2">

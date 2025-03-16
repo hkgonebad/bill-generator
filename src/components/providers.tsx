@@ -3,19 +3,11 @@
 import React from "react";
 import { SSRProvider } from "react-bootstrap";
 import { SessionProvider } from "next-auth/react";
-import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import NavbarApp from "./NavbarApp";
 import Footer from "./Footer";
-import "@fontsource/inter/300.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
-import "@fontsource/inter/700.css";
 
-// Bootstrap JS is required for interactive components
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Initialize Bootstrap JS on the client side
-
   return (
     <SessionProvider>
       <SSRProvider>

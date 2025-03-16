@@ -19,11 +19,26 @@ export interface RentReceiptProps {
   };
 }
 
-const Template1: React.FC<RentReceiptProps> = ({ landlordName, landlordAddress, tenantName, tenantAddress, rentAmount, paymentDate, paymentMode, receiptNumber, panNumber, rentPeriod }) => {
+const Template1: React.FC<RentReceiptProps> = ({
+  landlordName = "",
+  landlordAddress = "",
+  tenantName = "",
+  tenantAddress = "",
+  rentAmount = 0,
+  rentAmountInWords = "",
+  paymentDate = moment().format("YYYY-MM-DD"),
+  paymentMode = "Cash",
+  receiptNumber = "",
+  panNumber = "",
+  rentPeriod = {
+    from: moment().startOf("month").format("YYYY-MM-DD"),
+    to: moment().endOf("month").format("YYYY-MM-DD"),
+  },
+}) => {
   const formattedPaymentDate = moment(paymentDate).format("DD/MM/YYYY");
   const formattedFromDate = moment(rentPeriod.from).format("DD/MM/YYYY");
   const formattedToDate = moment(rentPeriod.to).format("DD/MM/YYYY");
-  const amountInWords = convertNumberToWords(rentAmount);
+  const amountInWords = rentAmountInWords || convertNumberToWords(rentAmount);
 
   return (
     <div className="rent-receipt template1">

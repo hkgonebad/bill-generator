@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
 import { Sun, Moon, FileText, Calculator, Receipt, Fuel, User, Clock, QrCode, Home, LayoutGrid, LogOut, LogIn, UserPlus } from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useSession, signOut } from "next-auth/react";
 
 const NavbarApp = () => {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Row, Col } from "react-bootstrap";
 import { RentReceiptProps } from "./Template1";
+import moment from "moment";
 
 interface LiveEditorProps {
   receiptData: RentReceiptProps;
@@ -10,13 +11,19 @@ interface LiveEditorProps {
 }
 
 const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fieldErrors = {}, handleBlur = () => {} }) => {
+  // Ensure rentPeriod is always defined
+  const rentPeriod = receiptData.rentPeriod || {
+    from: moment().startOf("month").format("YYYY-MM-DD"),
+    to: moment().endOf("month").format("YYYY-MM-DD"),
+  };
+
   const handleChange = (field: string, value: string | number) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
       if (parent === "rentPeriod") {
         onDataChange({
           rentPeriod: {
-            ...receiptData.rentPeriod,
+            ...rentPeriod,
             [child]: value,
           },
         });
@@ -46,7 +53,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               </Form.Label>
               <Form.Control
                 type="text"
-                value={receiptData.receiptNumber}
+                value={receiptData.receiptNumber || ""}
                 onChange={(e) => handleChange("receiptNumber", e.target.value)}
                 onBlur={() => handleBlur("receiptNumber", receiptData.receiptNumber)}
                 isInvalid={!!fieldErrors.receiptNumber}
@@ -62,7 +69,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               </Form.Label>
               <Form.Control
                 type="date"
-                value={receiptData.paymentDate}
+                value={receiptData.paymentDate || ""}
                 onChange={(e) => handleChange("paymentDate", e.target.value)}
                 onBlur={() => handleBlur("paymentDate", receiptData.paymentDate)}
                 isInvalid={!!fieldErrors.paymentDate}
@@ -81,7 +88,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               </Form.Label>
               <Form.Control
                 type="number"
-                value={receiptData.rentAmount}
+                value={receiptData.rentAmount || 0}
                 onChange={(e) => handleChange("rentAmount", parseFloat(e.target.value) || 0)}
                 onBlur={() => handleBlur("rentAmount", receiptData.rentAmount)}
                 isInvalid={!!fieldErrors.rentAmount}
@@ -97,7 +104,13 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               <Form.Label>
                 Payment Mode <span className="text-danger">*</span>
               </Form.Label>
-              <Form.Select value={receiptData.paymentMode} onChange={(e) => handleChange("paymentMode", e.target.value)} onBlur={() => handleBlur("paymentMode", receiptData.paymentMode)} isInvalid={!!fieldErrors.paymentMode} required>
+              <Form.Select
+                value={receiptData.paymentMode || "Cash"}
+                onChange={(e) => handleChange("paymentMode", e.target.value)}
+                onBlur={() => handleBlur("paymentMode", receiptData.paymentMode)}
+                isInvalid={!!fieldErrors.paymentMode}
+                required
+              >
                 <option value="Cash">Cash</option>
                 <option value="Bank Transfer">Bank Transfer</option>
                 <option value="UPI">UPI</option>
@@ -116,9 +129,9 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               </Form.Label>
               <Form.Control
                 type="date"
-                value={receiptData.rentPeriod.from}
+                value={rentPeriod.from}
                 onChange={(e) => handleChange("rentPeriod.from", e.target.value)}
-                onBlur={() => handleBlur("rentPeriod.from", receiptData.rentPeriod.from)}
+                onBlur={() => handleBlur("rentPeriod.from", rentPeriod.from)}
                 isInvalid={!!fieldErrors["rentPeriod.from"]}
                 required
               />
@@ -130,14 +143,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
               <Form.Label>
                 Rent Period To <span className="text-danger">*</span>
               </Form.Label>
-              <Form.Control
-                type="date"
-                value={receiptData.rentPeriod.to}
-                onChange={(e) => handleChange("rentPeriod.to", e.target.value)}
-                onBlur={() => handleBlur("rentPeriod.to", receiptData.rentPeriod.to)}
-                isInvalid={!!fieldErrors["rentPeriod.to"]}
-                required
-              />
+              <Form.Control type="date" value={rentPeriod.to} onChange={(e) => handleChange("rentPeriod.to", e.target.value)} onBlur={() => handleBlur("rentPeriod.to", rentPeriod.to)} isInvalid={!!fieldErrors["rentPeriod.to"]} required />
               <Form.Control.Feedback type="invalid">{fieldErrors["rentPeriod.to"]}</Form.Control.Feedback>
             </Form.Group>
           </Col>
@@ -152,7 +158,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
           </Form.Label>
           <Form.Control
             type="text"
-            value={receiptData.landlordName}
+            value={receiptData.landlordName || ""}
             onChange={(e) => handleChange("landlordName", e.target.value)}
             onBlur={() => handleBlur("landlordName", receiptData.landlordName)}
             isInvalid={!!fieldErrors.landlordName}
@@ -166,7 +172,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
           <Form.Control
             as="textarea"
             rows={2}
-            value={receiptData.landlordAddress}
+            value={receiptData.landlordAddress || ""}
             onChange={(e) => handleChange("landlordAddress", e.target.value)}
             onBlur={() => handleBlur("landlordAddress", receiptData.landlordAddress)}
             isInvalid={!!fieldErrors.landlordAddress}
@@ -186,7 +192,14 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
           <Form.Label>
             Tenant Name <span className="text-danger">*</span>
           </Form.Label>
-          <Form.Control type="text" value={receiptData.tenantName} onChange={(e) => handleChange("tenantName", e.target.value)} onBlur={() => handleBlur("tenantName", receiptData.tenantName)} isInvalid={!!fieldErrors.tenantName} required />
+          <Form.Control
+            type="text"
+            value={receiptData.tenantName || ""}
+            onChange={(e) => handleChange("tenantName", e.target.value)}
+            onBlur={() => handleBlur("tenantName", receiptData.tenantName)}
+            isInvalid={!!fieldErrors.tenantName}
+            required
+          />
           <Form.Control.Feedback type="invalid">{fieldErrors.tenantName}</Form.Control.Feedback>
         </Form.Group>
 
@@ -197,7 +210,7 @@ const LiveEditor: React.FC<LiveEditorProps> = ({ receiptData, onDataChange, fiel
           <Form.Control
             as="textarea"
             rows={2}
-            value={receiptData.tenantAddress}
+            value={receiptData.tenantAddress || ""}
             onChange={(e) => handleChange("tenantAddress", e.target.value)}
             onBlur={() => handleBlur("tenantAddress", receiptData.tenantAddress)}
             isInvalid={!!fieldErrors.tenantAddress}

@@ -144,6 +144,29 @@ const RentReceiptSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    receiptNumber: {
+      type: String,
+      required: true,
+    },
+    landlordAddress: {
+      type: String,
+    },
+    panNumber: {
+      type: String,
+    },
+    showPanDetails: {
+      type: Boolean,
+      default: false,
+    },
+    templateId: {
+      type: Number,
+      default: 1,
+    },
+    billType: {
+      type: String,
+      default: "rent",
+      enum: ["rent"],
+    },
     createdAt: {
       type: Date,
       default: Date.now,
