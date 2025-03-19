@@ -35,4 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-bill-generator-refer
+.cursor/rules
+.cursor
+
+bill-generator-reference
